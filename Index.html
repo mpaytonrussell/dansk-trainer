@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dansk Trainer</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,700;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4efe6;
+  --surface: #faf7f2;
+  --navy: #1a2744;
+  --forest: #2d5a3d;
+  --accent: #c8531e;
+  --gold: #c9922a;
+  --fire: #e05c1a;
+  --text: #1a1a1a;
+  --muted: #7a7060;
+  --border: #ddd5c4;
+  --know-bg: #e8f2eb; --know: #2d5a3d;
+  --unsure-bg: #fdf3e0; --unsure: #b5832a;
+  --dunno-bg: #fde8e3; --dunno: #8b2e1a;
+  --hot-bg: #fff0e8; --hot: #c8531e;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'Fraunces', Georgia, serif;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 24px 16px;
+  color: var(--text);
+}
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23b8a888' fill-opacity='0.07'%3E%3Cpath d='M0 0h1v1H0zm20 0h1v1h-1zM0 20h1v1H0zm20 20h1v1h-1z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.app { position:relative; z-index:1; width:100%; max-width:700px; }
+
+/* ── HEADER ── */
+header { text-align:center; margin-bottom:24px; }
+header h1 { font-size:2.2rem; font-weight:300; color:var(--navy); letter-spacing:-0.02em; font-style:italic; }
+header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
+.subtitle { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-top:4px; }
+
+
+/* ── MODES ── */
+.mode-bar { display:flex; gap:6px; justify-content:center; margin-bottom:18px; flex-wrap:wrap; }
+.mode-btn {
+  font-family:'DM Mono',monospace; font-size:0.67rem; letter-spacing:0.07em; text-transform:uppercase;
+  padding:6px 13px; border:1.5px solid var(--border); background:var(--surface); color:var(--muted);
+  border-radius:2px; cursor:pointer; transition:all 0.15s;
+}
+.mode-btn:hover { border-color:var(--accent); color:var(--accent); }
+.mode-btn.active { background:var(--navy); border-color:var(--navy); color:#f5f0e8; }
+.mode-btn.fire-mode { border-color:var(--fire); color:var(--fire); }
+.mode-btn.fire-mode.active { background:var(--fire); color:white; }
+
+/* ── PROGRESS ── */
+.progress-section { margin-bottom:18px; }
+.prog-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+.prog-top span { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); }
+.prog-bar { height:5px; background:#e0d8ca; border-radius:3px; overflow:hidden; display:flex; gap:2px; }
+.prog-know { background:var(--know); transition:width 0.4s; }
+.prog-unsure { background:var(--unsure); transition:width 0.4s; }
+.prog-dunno { background:var(--dunno); transition:width 0.4s; }
+.prog-hot { background:var(--fire); transition:width 0.4s; }
+
+/* ── CARD ── */
+.card-area { perspective:1200px; margin-bottom:16px; cursor:pointer; }
+.card-wrapper {
+  position:relative; width:100%; height:290px;
+  transform-style:preserve-3d;
+  transition:transform 0.5s cubic-bezier(0.4,0.2,0.2,1);
+}
+.card-wrapper.flipped { transform:rotateY(180deg); }
+.card-face {
+  position:absolute; inset:0; border-radius:8px;
+  backface-visibility:hidden;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:36px; text-align:center;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.07);
+}
+.card-front { background:var(--navy); color:#f5f0e8; }
+.card-back  { background:var(--forest); color:#f5f0e8; transform:rotateY(180deg); }
+.card-back.has-flag { background:#2a4a5e; }
+
+.card-tag {
+  font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.14em;
+  text-transform:uppercase; opacity:0.45; margin-bottom:14px;
+  position:absolute; top:18px; left:22px;
+}
+.card-num {
+  font-family:'DM Mono',monospace; font-size:0.6rem; opacity:0.3;
+  position:absolute; top:18px; right:22px;
+}
+.hot-badge {
+  position:absolute; top:14px; right:50px;
+  font-size:1rem; opacity:0.85;
+}
+.card-main { font-size:2rem; font-weight:400; letter-spacing:-0.01em; line-height:1.2; margin-bottom:8px; }
+.card-main.sentence { font-size:1.25rem; font-style:italic; line-height:1.45; }
+.card-main.medium { font-size:1.55rem; }
+.card-sub { font-family:'DM Mono',monospace; font-size:0.72rem; opacity:0.5; letter-spacing:0.04em; }
+.card-hint { font-family:'DM Mono',monospace; font-size:0.6rem; opacity:0.35; position:absolute; bottom:18px; letter-spacing:0.08em; }
+
+/* Context/flag note on back */
+.context-note {
+  margin-top:14px; padding:8px 14px; background:rgba(255,255,255,0.12);
+  border-radius:4px; font-family:'DM Mono',monospace; font-size:0.68rem;
+  line-height:1.5; letter-spacing:0.02em; max-width:440px; text-align:left;
+}
+.context-note.warning { background:rgba(255,180,60,0.2); border-left:2px solid #e8b84b; }
+.conj-row { display:flex; gap:18px; margin-top:12px; flex-wrap:wrap; justify-content:center; }
+.conj-item { text-align:center; }
+.conj-label { font-family:'DM Mono',monospace; font-size:0.54rem; opacity:0.4; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2px; }
+.conj-value { font-size:0.9rem; font-weight:300; opacity:0.85; }
+
+/* ── RATING ROW ── */
+.rating-area {
+  display:flex; gap:10px; justify-content:center; margin-bottom:20px;
+  opacity:0; pointer-events:none; transition:opacity 0.25s;
+}
+.rating-area.visible { opacity:1; pointer-events:all; }
+.rate-btn {
+  flex:1; max-width:150px; padding:12px 8px;
+  border:2px solid; border-radius:4px; background:transparent;
+  cursor:pointer; font-family:'Fraunces',serif; transition:all 0.15s;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+.rate-btn .em { font-size:1.3rem; }
+.rate-btn .lb { font-size:0.63rem; font-family:'DM Mono',monospace; letter-spacing:0.06em; text-transform:uppercase; }
+.r-know  { border-color:var(--know); color:var(--know); }
+.r-unsure{ border-color:var(--unsure); color:var(--unsure); }
+.r-dunno { border-color:var(--dunno); color:var(--dunno); }
+.r-hot   { border-color:var(--fire); color:var(--fire); }
+.r-know:hover  { background:var(--know); color:#fff; }
+.r-unsure:hover{ background:var(--unsure); color:#fff; }
+.r-dunno:hover { background:var(--dunno); color:#fff; }
+.r-hot:hover   { background:var(--fire); color:#fff; }
+.r-hot.active  { background:var(--fire); color:#fff; }
+
+/* ── CONTROLS ── */
+.controls { display:flex; gap:8px; justify-content:center; margin-bottom:24px; flex-wrap:wrap; }
+.ctrl-btn {
+  font-family:'DM Mono',monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase;
+  padding:8px 16px; border:1.5px solid var(--border); background:var(--surface);
+  color:var(--muted); border-radius:2px; cursor:pointer; transition:all 0.15s;
+}
+.ctrl-btn:hover { border-color:var(--text); color:var(--text); }
+.ctrl-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+.ctrl-btn.primary:hover { background:#a84018; border-color:#a84018; }
+
+/* ── SESSION DONE ── */
+.session-done { display:none; text-align:center; padding:36px 16px; }
+.session-done.visible { display:block; }
+.session-done h2 { font-size:2rem; font-weight:300; color:var(--navy); margin-bottom:6px; }
+.session-done p  { color:var(--muted); font-family:'DM Mono',monospace; font-size:0.72rem; letter-spacing:0.06em; margin-bottom:22px; }
+.score-grid { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:24px; }
+.score-box { padding:12px 18px; border-radius:4px; }
+.score-box .num { font-size:2rem; font-weight:700; }
+.score-box .lbl { font-family:'DM Mono',monospace; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.1em; opacity:0.7; margin-top:2px; }
+.s-know  { background:var(--know-bg); color:var(--know); }
+.s-unsure{ background:var(--unsure-bg); color:var(--unsure); }
+.s-dunno { background:var(--dunno-bg); color:var(--dunno); }
+.s-hot   { background:var(--hot-bg); color:var(--hot); }
+
+/* ── PANELS ── */
+.panel { background:var(--surface); border:1.5px solid var(--border); border-radius:4px; overflow:hidden; margin-bottom:12px; }
+.panel-hdr {
+  padding:11px 16px; display:flex; justify-content:space-between; align-items:center;
+  cursor:pointer; border-bottom:1px solid transparent; transition:border-color 0.2s;
+}
+.panel-hdr.open { border-bottom-color:var(--border); }
+.panel-hdr h3 { font-size:0.75rem; font-family:'DM Mono',monospace; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); font-weight:400; }
+.panel-hdr .arrow { font-size:0.68rem; color:var(--muted); transition:transform 0.2s; }
+.panel-hdr .arrow.open { transform:rotate(180deg); }
+.panel-body { display:none; padding:14px 16px; max-height:220px; overflow-y:auto; }
+.panel-body.open { display:block; }
+.chip {
+  display:inline-flex; align-items:center; gap:4px; padding:3px 9px;
+  border-radius:2px; font-family:'DM Mono',monospace; font-size:0.66rem; margin:3px;
+}
+.chip-know  { background:var(--know-bg); color:var(--know); border:1px solid #c0ddc9; }
+.chip-unsure{ background:var(--unsure-bg); color:var(--unsure); border:1px solid #e8d4a0; }
+.chip-dunno { background:var(--dunno-bg); color:var(--dunno); border:1px solid #ddb8b0; }
+.chip-hot   { background:var(--hot-bg); color:var(--hot); border:1px solid #f0c0a0; }
+
+/* ── AI SECTION ── */
+.ai-section { background:var(--surface); border:1.5px solid var(--border); border-radius:4px; padding:18px; margin-bottom:16px; display:none; }
+.ai-section h3 { font-family:'DM Mono',monospace; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+.ai-row { display:flex; gap:8px; flex-wrap:wrap; }
+.ai-row input {
+  flex:1; min-width:200px; padding:9px 13px;
+  border:1.5px solid var(--border); border-radius:2px;
+  background:var(--bg); font-family:'Fraunces',serif; font-size:0.9rem;
+  color:var(--text); outline:none;
+}
+.ai-row input:focus { border-color:var(--navy); }
+.ai-loading { display:none; align-items:center; gap:8px; margin-top:10px; font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); }
+.ai-loading.visible { display:flex; }
+.sm-spin { width:13px; height:13px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; }
+
+/* ── HOT LIST ROUND DIVIDER ── */
+.hot-divider {
+  text-align:center; padding:10px; margin:0 0 10px;
+  font-family:'DM Mono',monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--fire); border:1.5px dashed var(--fire); border-radius:4px;
+  background:var(--hot-bg); display:none;
+}
+.hot-divider.visible { display:block; }
+
+/* ── FLIP TOGGLE ── */
+.flip-toggle {
+  display:flex; align-items:center; justify-content:center;
+  gap:10px; margin-bottom:16px;
+}
+.flip-toggle span {
+  font-family:'DM Mono',monospace; font-size:0.68rem;
+  letter-spacing:0.07em; text-transform:uppercase; color:var(--muted);
+  transition:color 0.2s;
+}
+.flip-toggle span.active { color:var(--navy); font-weight:500; }
+.toggle-track {
+  width:44px; height:24px; background:var(--border); border-radius:12px;
+  cursor:pointer; position:relative; transition:background 0.2s; flex-shrink:0;
+  border:none; padding:0;
+}
+.toggle-track.on { background:var(--navy); }
+.toggle-thumb {
+  position:absolute; top:3px; left:3px;
+  width:18px; height:18px; background:#fff; border-radius:50%;
+  transition:transform 0.2s; pointer-events:none;
+  box-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-track.on .toggle-thumb { transform:translateX(20px); }
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <h1><span>Dansk</span> Trainer</h1>
+  <div class="subtitle">194 words · validated &amp; enriched · 158 sentences · 51 key words</div>
+</header>
+
+
+<!-- Flip direction toggle -->
+<div class="flip-toggle">
+  <span id="lblDanish" class="active">Danish → English</span>
+  <button class="toggle-track" id="flipToggle" onclick="toggleFlipDir()" aria-label="Flip card direction">
+    <div class="toggle-thumb"></div>
+  </button>
+  <span id="lblEnglish">English → Danish</span>
+</div>
+
+<!-- Modes -->
+<div class="mode-bar">
+  <button class="mode-btn active" onclick="setMode('all',this)">All Cards</button>
+  <button class="mode-btn" onclick="setMode('verbs',this)">Vocab</button>
+  <button class="mode-btn" onclick="setMode('sentences',this)">Sentences</button>
+  <button class="mode-btn" onclick="setMode('keywords',this)">Key Words</button>
+  <button class="mode-btn" onclick="setMode('struggle',this)">Struggling</button>
+  <button class="mode-btn fire-mode" onclick="setMode('hot',this)">🔥 Hot List (<span id="hotCount">0</span>)</button>
+  <button class="mode-btn" onclick="setMode('ai',this)">AI Generate</button>
+</div>
+
+<!-- Progress -->
+<div class="progress-section">
+  <div class="prog-top">
+    <span id="cardCounter">Card 1 of 0</span>
+    <span id="sessionStats">✓ 0 &nbsp;~ 0 &nbsp;✗ 0</span>
+  </div>
+  <div class="prog-bar">
+    <div class="prog-know"   id="progKnow"   style="width:0%"></div>
+    <div class="prog-unsure" id="progUnsure" style="width:0%"></div>
+    <div class="prog-dunno"  id="progDunno"  style="width:0%"></div>
+  </div>
+</div>
+
+<!-- AI generate section -->
+<div class="ai-section" id="aiSection">
+  <h3>Generate cards with AI</h3>
+  <div class="ai-row">
+    <input type="text" id="aiTopic" placeholder="e.g. 'at the school pickup', 'weekend plans with family', 'at the doctor'..." />
+    <button class="ctrl-btn primary" onclick="generateAI()">Generate</button>
+  </div>
+  <div class="ai-loading" id="aiLoading"><div class="sm-spin"></div> Generating Danish cards...</div>
+</div>
+
+<!-- Hot round divider -->
+<div class="hot-divider" id="hotDivider">🔥 Hot List — words you've flagged as tricky</div>
+
+<!-- Card -->
+<div id="mainCardArea">
+  <div class="card-area" onclick="flipCard()">
+    <div class="card-wrapper" id="cardWrapper">
+      <div class="card-face card-front">
+        <div class="card-tag" id="cardTag">vocab</div>
+        <div class="card-num" id="cardNum">#1</div>
+        <div class="card-main" id="frontMain">Loading...</div>
+        <div class="card-sub"  id="frontSub"></div>
+        <div class="card-hint">tap to reveal →</div>
+      </div>
+      <div class="card-face card-back" id="cardBack">
+        <div class="card-tag" id="backTag">english</div>
+        <div class="hot-badge" id="hotBadge" style="display:none">🔥</div>
+        <div class="card-main" id="backMain"></div>
+        <div class="card-sub"  id="backSub"></div>
+        <div class="context-note" id="contextNote" style="display:none"></div>
+        <div class="conj-row"  id="conjRow"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating -->
+  <div class="rating-area" id="ratingArea">
+    <button class="rate-btn r-dunno"  onclick="rateCard('dunno')"><span class="em">😕</span><span class="lb">Don't know</span></button>
+    <button class="rate-btn r-unsure" onclick="rateCard('unsure')"><span class="em">😐</span><span class="lb">Getting there</span></button>
+    <button class="rate-btn r-know"   onclick="rateCard('know')"><span class="em">😊</span><span class="lb">Got it!</span></button>
+    <button class="rate-btn r-hot" id="hotBtn" onclick="toggleHot()"><span class="em">🔥</span><span class="lb">Hot List</span></button>
+  </div>
+
+  <!-- Session done -->
+  <div class="session-done" id="sessionDone">
+    <h2>Session done 🇩🇰</h2>
+    <p>Here's how you did this round</p>
+    <div class="score-grid">
+      <div class="score-box s-know"><div class="num" id="finalKnow">0</div><div class="lbl">Got it</div></div>
+      <div class="score-box s-unsure"><div class="num" id="finalUnsure">0</div><div class="lbl">Getting there</div></div>
+      <div class="score-box s-dunno"><div class="num" id="finalDunno">0</div><div class="lbl">Still learning</div></div>
+      <div class="score-box s-hot"><div class="num" id="finalHot">0</div><div class="lbl">🔥 Hot</div></div>
+    </div>
+    <button class="ctrl-btn primary" onclick="restartSession()">Go again</button>
+    &nbsp;
+    <button class="ctrl-btn" onclick="setMode('struggle', document.querySelector('.mode-btn:nth-child(5)'))">Review struggling</button>
+    &nbsp;
+    <button class="ctrl-btn" style="border-color:var(--fire);color:var(--fire)" onclick="setMode('hot', document.querySelector('.fire-mode'))">Review 🔥 hot list</button>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <button class="ctrl-btn" onclick="shuffleDeck()">↺ Shuffle</button>
+  <button class="ctrl-btn" onclick="skipCard()">Skip →</button>
+  <button class="ctrl-btn" onclick="resetProgress()">Reset scores</button>
+</div>
+
+<!-- Panels -->
+<div class="panel">
+  <div class="panel-hdr" onclick="togglePanel('panelKnow')">
+    <h3>📗 Words I know (<span id="knowCount">0</span>)</h3>
+    <span class="arrow" id="panelKnowArrow">▼</span>
+  </div>
+  <div class="panel-body" id="panelKnow"></div>
+</div>
+<div class="panel">
+  <div class="panel-hdr" onclick="togglePanel('panelHot')">
+    <h3>🔥 Hot list — my tricky words (<span id="hotListCount">0</span>)</h3>
+    <span class="arrow" id="panelHotArrow">▼</span>
+  </div>
+  <div class="panel-body" id="panelHot"></div>
+</div>
+<div class="panel">
+  <div class="panel-hdr" onclick="togglePanel('panelDunno')">
+    <h3>📕 Still learning (<span id="dunnoCount">0</span>)</h3>
+    <span class="arrow" id="panelDunnoArrow">▼</span>
+  </div>
+  <div class="panel-body" id="panelDunno"></div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+// ════════════════════════════════════════════
+// DATA — validated & enriched, baked in permanently
+// ════════════════════════════════════════════
+const ENRICHED_VOCAB = [{"danish":"advare","english":"to warn","context":"","flag":false,"type":"vocab"},{"danish":"ændre","english":"to change","context":"","flag":false,"type":"vocab"},{"danish":"afbryde","english":"to interrupt","context":"","flag":false,"type":"vocab"},{"danish":"aflevere","english":"to hand in / deliver","context":"aflevere = hand something to someone. levere = deliver goods commercially.","flag":false,"type":"vocab"},{"danish":"aflyse","english":"to cancel","context":"Note: original spelling 'aflysse' is a typo — correct form is aflyse.","flag":false,"type":"vocab"},{"danish":"alvorlig","english":"serious","context":"","flag":false,"type":"vocab"},{"danish":"anbefale","english":"to recommend","context":"","flag":false,"type":"vocab"},{"danish":"anholde","english":"to arrest","context":"","flag":false,"type":"vocab"},{"danish":"anmelde","english":"to report (to police)","context":"anmelde = report a crime. melde = report/notify more generally.","flag":false,"type":"vocab"},{"danish":"annonce","english":"advertisement","context":"","flag":false,"type":"vocab"},{"danish":"annullere","english":"to cancel / annul","context":"annullere = formal cancellation (contracts, orders). aflyse = cancel an event.","flag":false,"type":"vocab"},{"danish":"ansætte","english":"to employ / hire","context":"","flag":false,"type":"vocab"},{"danish":"ansøgningen","english":"the application","context":"Note: this is a noun (ansøgning = application). The definite form is ansøgningen.","flag":false,"type":"vocab"},{"danish":"anvende","english":"to use / apply","context":"anvende = use in a formal/technical sense. bruge = use casually.","flag":false,"type":"vocab"},{"danish":"anerkende","english":"to recognize / acknowledge","context":"Note: original 'at anerkender' has redundant 'at' and wrong conjugation — infinitive is anerkende.","flag":false,"type":"vocab"},{"danish":"bære","english":"to carry / wear","context":"bære = carry (physically) OR wear (clothing). Context determines meaning.","flag":false,"type":"vocab"},{"danish":"begrænse","english":"to limit / restrict","context":"","flag":false,"type":"vocab"},{"danish":"begrave","english":"to bury","context":"","flag":false,"type":"vocab"},{"danish":"behandle","english":"to treat / handle","context":"behandle = treat a patient OR handle a matter/situation.","flag":false,"type":"vocab"},{"danish":"beholde","english":"to keep","context":"","flag":false,"type":"vocab"},{"danish":"behøve","english":"to need","context":"behøve is often used in negative: 'du behøver ikke' = you don't need to. Trænge til is more common for positive need.","flag":false,"type":"vocab"},{"danish":"bemærke","english":"to notice / remark","context":"","flag":false,"type":"vocab"},{"danish":"beskytte","english":"to protect","context":"","flag":false,"type":"vocab"},{"danish":"beslutte","english":"to decide","context":"","flag":false,"type":"vocab"},{"danish":"bestå","english":"to consist of / pass (a test)","context":"bestå af = consist of. bestå en eksamen = pass an exam. Two very different meanings.","flag":false,"type":"vocab"},{"danish":"bestemme","english":"to determine / decide","context":"bestemme = decide/be in charge. afgøre = determine an outcome.","flag":false,"type":"vocab"},{"danish":"bevise","english":"to prove","context":"","flag":false,"type":"vocab"},{"danish":"bidrage","english":"to contribute","context":"","flag":false,"type":"vocab"},{"danish":"blande","english":"to mix","context":"","flag":false,"type":"vocab"},{"danish":"bytte","english":"to exchange / swap","context":"","flag":false,"type":"vocab"},{"danish":"dække","english":"to cover","context":"dække = cover physically OR cover a topic. Very versatile.","flag":false,"type":"vocab"},{"danish":"danne","english":"to form / create","context":"Original translation 'form' is correct but incomplete — danne means to form/create/educate.","flag":false,"type":"vocab"},{"danish":"dele","english":"to share / divide","context":"Original 'share' is correct. Also means to divide/split.","flag":false,"type":"vocab"},{"danish":"deltage","english":"to participate","context":"","flag":false,"type":"vocab"},{"danish":"det kan godt være","english":"it may well be / maybe","context":"Common phrase: 'Det kan godt være' = perhaps/that may be so. Very useful in conversation.","flag":false,"type":"vocab"},{"danish":"det mindste","english":"at least / the least","context":"'i det mindste' = at least. Original translation 'the least' is correct.","flag":false,"type":"vocab"},{"danish":"dømme","english":"to judge","context":"Original 'judge' is correct as a verb. Also the noun 'dommer' = judge/referee.","flag":false,"type":"vocab"},{"danish":"dukke op","english":"to show up / appear","context":"'dukke op' (two words) = to turn up/appear unexpectedly. Original had typo 'dukkeop'.","flag":false,"type":"vocab"},{"danish":"ejendom","english":"property / real estate","context":"Noun, not a verb. ejendom = property/real estate.","flag":false,"type":"vocab"},{"danish":"falde","english":"to fall","context":"","flag":false,"type":"vocab"},{"danish":"fange","english":"to catch / capture","context":"","flag":false,"type":"vocab"},{"danish":"fastholde","english":"to maintain / hold firm","context":"fastholde sin mening = stick to one's opinion. fastholde en person = detain someone.","flag":false,"type":"vocab"},{"danish":"fastsætte","english":"to set / determine","context":"Original 'to fix' is misleading — fastsætte means to set/establish (a price, date, rule). Fixe = repair.","flag":true,"type":"vocab"},{"danish":"fjerne","english":"to remove","context":"","flag":false,"type":"vocab"},{"danish":"flygte","english":"to flee / escape","context":"Original 'escape' is close but flygte implies fleeing danger. undslippe = escape confinement.","flag":false,"type":"vocab"},{"danish":"føde","english":"to give birth","context":"føde = give birth. Also: føde = food (noun). Very different contexts.","flag":false,"type":"vocab"},{"danish":"fodre","english":"to feed (animals)","context":"fodre = feed animals. Give mad = give food to people.","flag":false,"type":"vocab"},{"danish":"forbedre","english":"to improve","context":"","flag":false,"type":"vocab"},{"danish":"forberede","english":"to prepare","context":"","flag":false,"type":"vocab"},{"danish":"forblive","english":"to remain / stay","context":"More formal than blive. forblive = remain (formal). blive = stay/remain (everyday).","flag":false,"type":"vocab"},{"danish":"forbrydelse","english":"crime / offence","context":"Noun. forbrydelse = crime. forbryder = criminal.","flag":false,"type":"vocab"},{"danish":"forbundet","english":"connected / linked","context":"Adjective/past participle. forbundet med = connected to/with.","flag":false,"type":"vocab"},{"danish":"fordele","english":"to distribute / divide","context":"","flag":false,"type":"vocab"},{"danish":"foretrække","english":"to prefer","context":"","flag":false,"type":"vocab"},{"danish":"forhandle","english":"to negotiate","context":"","flag":false,"type":"vocab"},{"danish":"forholdet","english":"the relationship / ratio","context":"Noun. forholdet = the relationship/ratio/situation. et forhold = a relationship.","flag":false,"type":"vocab"},{"danish":"forsøge","english":"to try / attempt","context":"forsøge = attempt (slightly more effort implied than prøve). prøve = try casually.","flag":false,"type":"vocab"},{"danish":"forsvar","english":"defence","context":"Noun. forsvar = defence. forsvare = to defend (verb).","flag":false,"type":"vocab"},{"danish":"fortjene","english":"to deserve / earn","context":"fortjene = deserve OR earn (money). tjene = earn money. Two meanings worth knowing.","flag":false,"type":"vocab"},{"danish":"fortsætte","english":"to continue","context":"Original 'fortsatte' is past tense — infinitive is fortsætte.","flag":false,"type":"vocab"},{"danish":"forvandle","english":"to transform","context":"","flag":false,"type":"vocab"},{"danish":"forvente","english":"to expect","context":"","flag":false,"type":"vocab"},{"danish":"fremgå","english":"to appear / be evident","context":"fremgå = emerge from/be apparent from (formal). 'Det fremgår af rapporten' = it is evident from the report.","flag":false,"type":"vocab"},{"danish":"fremlægge","english":"to present / put forward","context":"fremlægge = present formally (a plan, proposal). præsentere = introduce/present more generally.","flag":false,"type":"vocab"},{"danish":"fremstille","english":"to produce / manufacture","context":"fremstille = produce/manufacture OR portray. Context determines meaning.","flag":false,"type":"vocab"},{"danish":"frygte","english":"to fear","context":"","flag":false,"type":"vocab"},{"danish":"fungere","english":"to function / work","context":"'Det fungerer' = it works/functions. Very common in Danish.","flag":false,"type":"vocab"},{"danish":"fyre","english":"to fire (someone)","context":"fyre = fire/dismiss an employee. Also: to fire a gun. Also: fyr = guy (informal).","flag":false,"type":"vocab"},{"danish":"gemme","english":"to save / hide / store","context":"⚠️ gemme = save/store an object OR hide something. redde = save a person/situation from danger. These are NOT interchangeable.","flag":false,"type":"vocab"},{"danish":"gennemføre","english":"to implement / carry out","context":"","flag":false,"type":"vocab"},{"danish":"gennemgå","english":"to go through / review","context":"gennemgå = go through (a document, process). Very common in work settings.","flag":false,"type":"vocab"},{"danish":"gifte sig","english":"to get married","context":"Reflexive verb — always 'gifte sig'. 'Hun gifter sig' = she is getting married.","flag":false,"type":"vocab"},{"danish":"god mening","english":"good sense / makes sense","context":"'Det giver god mening' = that makes good sense. More of a phrase than a standalone word.","flag":false,"type":"vocab"},{"danish":"godkende","english":"to approve","context":"","flag":false,"type":"vocab"},{"danish":"gøre","english":"to do / make","context":"gøre = do or make. lave = make (physical things). Very common source of confusion.","flag":false,"type":"vocab"},{"danish":"hade","english":"to hate","context":"","flag":false,"type":"vocab"},{"danish":"hælde","english":"to pour","context":"hælde = pour liquid. Also: hælde = tilt/lean (as in a slope).","flag":false,"type":"vocab"},{"danish":"handel","english":"trade / commerce","context":"Noun. handel = trade/commerce. handle = to act/shop (verb). Easy to confuse.","flag":false,"type":"vocab"},{"danish":"handle","english":"to act / shop","context":"handle = take action OR go shopping. 'Jeg skal handle' = I need to go shopping.","flag":false,"type":"vocab"},{"danish":"have","english":"to have","context":"Original listed 'har / have' — har is present tense. Infinitive is have.","flag":false,"type":"vocab"},{"danish":"hedde","english":"to be called / named","context":"'Hvad hedder du?' = What is your name? One of the most essential verbs.","flag":false,"type":"vocab"},{"danish":"hente","english":"to fetch / pick up","context":"hente = fetch/collect/pick up. Very common: 'hente børn' = pick up the kids.","flag":false,"type":"vocab"},{"danish":"henvise","english":"to refer / direct","context":"","flag":false,"type":"vocab"},{"danish":"hilse","english":"to greet / say hello","context":"hilse = greet. 'Hils familien' = say hello to the family.","flag":false,"type":"vocab"},{"danish":"hindre","english":"to prevent / hinder","context":"","flag":false,"type":"vocab"},{"danish":"holde","english":"to hold / keep / stop","context":"holde = hold/keep/maintain. Also: holde op = stop. holde af = be fond of. Very versatile.","flag":false,"type":"vocab"},{"danish":"høre","english":"to hear","context":"høre = hear. lytte = listen (active). høre til = belong to.","flag":false,"type":"vocab"},{"danish":"huske","english":"to remember","context":"","flag":false,"type":"vocab"},{"danish":"hviske","english":"to whisper","context":"","flag":false,"type":"vocab"},{"danish":"hvordan gik det så?","english":"How did it go?","context":"Common conversational phrase. 'Så' adds informality — like 'so how did it go then?'","flag":false,"type":"vocab"},{"danish":"indeholde","english":"to contain","context":"","flag":false,"type":"vocab"},{"danish":"indlede","english":"to initiate / begin","context":"indlede = initiate formally (a meeting, process). begynde = begin more generally.","flag":false,"type":"vocab"},{"danish":"indrette","english":"to furnish / set up","context":"Original 'arrange' is misleading — indrette = decorate/furnish a space. arrangere = arrange an event.","flag":true,"type":"vocab"},{"danish":"indrømme","english":"to admit","context":"","flag":false,"type":"vocab"},{"danish":"indtage","english":"to consume / take (medicine)","context":"Original 'consume' is correct. Also: indtage en holdning = adopt a position.","flag":false,"type":"vocab"},{"danish":"inspirere","english":"to inspire","context":"","flag":false,"type":"vocab"},{"danish":"installere","english":"to install","context":"Original 'installer' is a typo — correct infinitive is installere.","flag":false,"type":"vocab"},{"danish":"interessere","english":"to interest","context":"'Det interesserer mig' = it interests me. Often reflexive: 'interessere sig for' = be interested in.","flag":false,"type":"vocab"},{"danish":"investere","english":"to invest","context":"","flag":false,"type":"vocab"},{"danish":"invitere","english":"to invite","context":"","flag":false,"type":"vocab"},{"danish":"irritere","english":"to irritate / annoy","context":"","flag":false,"type":"vocab"},{"danish":"kæmpe","english":"to fight / struggle","context":"Original 'fight / compete' — kæmpe leans more toward struggle/fight hard than compete. konkurrere = compete.","flag":false,"type":"vocab"},{"danish":"kalde","english":"to call / name","context":"kalde = call someone (by name/phone). ringe = call on phone specifically.","flag":false,"type":"vocab"},{"danish":"kaste","english":"to throw","context":"","flag":false,"type":"vocab"},{"danish":"kende","english":"to know (a person/place)","context":"⚠️ kende = know a person or place (familiarity). vide = know a fact. These are NOT interchangeable.","flag":false,"type":"vocab"},{"danish":"klare","english":"to manage / handle","context":"klare sig = manage/cope. 'Jeg klarer det' = I'll handle it. Very common.","flag":false,"type":"vocab"},{"danish":"konkurrence","english":"competition","context":"Noun. konkurrere = to compete (verb).","flag":false,"type":"vocab"},{"danish":"kontrollere","english":"to check / control","context":"kontrollere = check/verify. Also means control in some contexts.","flag":false,"type":"vocab"},{"danish":"kræve","english":"to require / demand","context":"","flag":false,"type":"vocab"},{"danish":"kritisere","english":"to criticize","context":"","flag":false,"type":"vocab"},{"danish":"lade som om","english":"to pretend","context":"Phrase. 'Han lader som om han ikke ved det' = he pretends he doesn't know.","flag":false,"type":"vocab"},{"danish":"lande","english":"to land","context":"","flag":false,"type":"vocab"},{"danish":"le","english":"to laugh","context":"Original 'laugh' is correct — le is the verb. latter = laughter (noun).","flag":false,"type":"vocab"},{"danish":"leve","english":"to live (be alive)","context":"leve = to be alive/live. bo = to live somewhere (reside). Common confusion.","flag":false,"type":"vocab"},{"danish":"levere","english":"to deliver","context":"levere = deliver goods. aflevere = hand in/deliver to someone. Both mean deliver but different contexts.","flag":false,"type":"vocab"},{"danish":"ligge","english":"to lie (be lying down)","context":"⚠️ ligge = be situated/lie down (position). lægge = to lay something down (action). Easily confused.","flag":false,"type":"vocab"},{"danish":"ligne","english":"to resemble / look like","context":"","flag":false,"type":"vocab"},{"danish":"love","english":"to promise","context":"⚠️ love = to promise (verb). kærlighed = love (noun). These look nothing alike but beginners confuse them with English 'love'.","flag":false,"type":"vocab"},{"danish":"mangle","english":"to be missing / lack","context":"Original 'missing' is correct but mangle is a verb: 'Jeg mangler' = I'm missing/I lack. Very common.","flag":false,"type":"vocab"},{"danish":"medvirke","english":"to contribute / participate","context":"medvirke = participate/contribute (formal). bidrage = contribute more generally.","flag":false,"type":"vocab"},{"danish":"melde","english":"to report / notify","context":"melde = report/notify. anmelde = report to police specifically.","flag":false,"type":"vocab"},{"danish":"minde","english":"to remind","context":"minde om = remind of. Also: minde = memory (noun).","flag":false,"type":"vocab"},{"danish":"miste","english":"to lose","context":"⚠️ miste = lose something permanently (lose a person, lose your keys forever). tabe = lose a game/match. Different contexts.","flag":false,"type":"vocab"},{"danish":"modtage","english":"to receive","context":"","flag":false,"type":"vocab"},{"danish":"nemlig","english":"namely / you see / that's why","context":"Original 'exactly' is not quite right — nemlig is a connector meaning 'namely' or 'you see'. 'Jeg er træt, nemlig' = I'm tired, you see.","flag":true,"type":"vocab"},{"danish":"nemt","english":"easily","context":"","flag":false,"type":"vocab"},{"danish":"nikke","english":"to nod","context":"","flag":false,"type":"vocab"},{"danish":"nyde","english":"to enjoy","context":"Original 'nyder' is present tense — infinitive is nyde.","flag":false,"type":"vocab"},{"danish":"ødelægge","english":"to destroy / ruin","context":"","flag":false,"type":"vocab"},{"danish":"øge","english":"to increase","context":"","flag":false,"type":"vocab"},{"danish":"omfatte","english":"to include / encompass","context":"","flag":false,"type":"vocab"},{"danish":"område","english":"area / field / domain","context":"Noun. område = area/region/field. Very common in Danish.","flag":false,"type":"vocab"},{"danish":"opdage","english":"to discover / notice","context":"","flag":false,"type":"vocab"},{"danish":"opfinde","english":"to invent","context":"","flag":false,"type":"vocab"},{"danish":"oplysninger","english":"information","context":"Noun (plural). oplysning = a piece of information. Oplysninger = information/details.","flag":false,"type":"vocab"},{"danish":"opslag","english":"posting / notice","context":"Original 'bulletin' is close — opslag = a posting/notice (on a board, online). Also: opslag = look-up.","flag":false,"type":"vocab"},{"danish":"pålidelig","english":"reliable","context":"Original 'pålidelige' is the plural/definite form — base adjective is pålidelig.","flag":false,"type":"vocab"},{"danish":"pinlig","english":"embarrassing","context":"⚠️ pinlig = embarrassing (the situation). flov = embarrassed (how you feel). Original 'embarrassed' describes a feeling — pinlig describes a situation.","flag":true,"type":"vocab"},{"danish":"pleje","english":"to usually do / to tend to","context":"Original 'usually' describes the meaning: 'Jeg plejer at...' = I usually... One of the most useful patterns in Danish.","flag":false,"type":"vocab"},{"danish":"prøv at se","english":"just look / try to see","context":"Conversational phrase. 'Prøv at se her' = look here / just look at this.","flag":false,"type":"vocab"},{"danish":"råbe","english":"to shout","context":"","flag":false,"type":"vocab"},{"danish":"regering","english":"government","context":"Original 'ruling or government' — regering simply means government. Adjective 'regerende' = ruling.","flag":false,"type":"vocab"},{"danish":"ryge","english":"to smoke","context":"ryge = smoke (cigarettes). Also: ryge = fly fast (slang). Usually means smoke.","flag":false,"type":"vocab"},{"danish":"ryste","english":"to shake / tremble","context":"ryste = shake/tremble. 'Han ryster på hænderne' = his hands are trembling.","flag":false,"type":"vocab"},{"danish":"selvom","english":"even though / although","context":"","flag":false,"type":"vocab"},{"danish":"sikkerhed","english":"safety / security","context":"sikkerhed = both safety AND security. Context determines which. Sikkerhedsbælte = seatbelt. Sikkerhedsvagt = security guard.","flag":false,"type":"vocab"},{"danish":"skabe","english":"to create","context":"","flag":false,"type":"vocab"},{"danish":"snavset","english":"dirty","context":"Original 'snavsede' is the plural/definite form — base adjective is snavset.","flag":false,"type":"vocab"},{"danish":"sørge for","english":"to make sure / ensure","context":"'Sørg for at...' = make sure to... Very common phrase. Stronger than 'ensure' — implies taking responsibility.","flag":false,"type":"vocab"},{"danish":"stå op","english":"to get up / stand up","context":"stå op = get out of bed OR stand up. 'Jeg stod op kl. 7' = I got up at 7.","flag":false,"type":"vocab"},{"danish":"stadig","english":"still / yet","context":"","flag":false,"type":"vocab"},{"danish":"sted","english":"place","context":"Noun. sted = place. 'Et godt sted' = a good place.","flag":false,"type":"vocab"},{"danish":"stillingen","english":"the position / the job","context":"Noun. stilling = position/job. stillingen = the position (definite).","flag":false,"type":"vocab"},{"danish":"støtte","english":"to support","context":"","flag":false,"type":"vocab"},{"danish":"svigte","english":"to let down / fail","context":"Original 'betray' is close but too strong — svigte = let someone down, fail to show up. forråde = betray (intentionally).","flag":true,"type":"vocab"},{"danish":"synke","english":"to sink / swallow","context":"⚠️ synke = sink (in water) AND swallow (food/drink). Two very different meanings — context is everything.","flag":false,"type":"vocab"},{"danish":"tabe","english":"to lose (a game)","context":"⚠️ tabe = lose a game/match/competition. miste = lose something permanently. Original just said 'to lose' — context matters.","flag":false,"type":"vocab"},{"danish":"tælle","english":"to count","context":"","flag":false,"type":"vocab"},{"danish":"tænde","english":"to turn on / light","context":"tænde = turn on (a light, device) OR light (a candle). slukke = turn off.","flag":false,"type":"vocab"},{"danish":"tage hjem","english":"to go home","context":"Phrase. 'Jeg tager hjem nu' = I'm going home now. Very common.","flag":false,"type":"vocab"},{"danish":"takke","english":"to thank","context":"","flag":false,"type":"vocab"},{"danish":"tilbyde","english":"to offer","context":"","flag":false,"type":"vocab"},{"danish":"tilfældet","english":"the case","context":"Noun. tilfælde = case/instance. 'I dette tilfælde' = in this case. tilfældet = the case (definite).","flag":false,"type":"vocab"},{"danish":"tillade","english":"to allow / permit","context":"","flag":false,"type":"vocab"},{"danish":"tjene","english":"to earn / serve","context":"tjene = earn money OR serve (food/in military). 'Jeg tjener 40.000' = I earn 40,000.","flag":false,"type":"vocab"},{"danish":"tømme","english":"to empty","context":"","flag":false,"type":"vocab"},{"danish":"tørre","english":"to dry / wipe","context":"tørre = dry something OR wipe. 'Tør hænderne' = dry your hands.","flag":false,"type":"vocab"},{"danish":"trække","english":"to pull / draw","context":"trække = pull OR draw (breath, picture). 'Trække vejret' = to breathe.","flag":false,"type":"vocab"},{"danish":"trykke","english":"to press / print","context":"trykke = press a button OR print. 'Tryk her' = press here.","flag":false,"type":"vocab"},{"danish":"turde","english":"to dare","context":"","flag":false,"type":"vocab"},{"danish":"tvinge","english":"to force","context":"","flag":false,"type":"vocab"},{"danish":"tvivl","english":"doubt","context":"Noun. tvivle = to doubt (verb). 'Ingen tvivl' = no doubt.","flag":false,"type":"vocab"},{"danish":"udføre","english":"to carry out / perform","context":"","flag":false,"type":"vocab"},{"danish":"udgive","english":"to publish","context":"","flag":false,"type":"vocab"},{"danish":"udløse","english":"to trigger / release","context":"","flag":false,"type":"vocab"},{"danish":"udnytte","english":"to make use of / exploit","context":"udnytte = use/exploit a resource. Can be positive (make good use of) or negative (exploit someone).","flag":false,"type":"vocab"},{"danish":"udsætte","english":"to postpone / expose","context":"⚠️ udsætte = postpone (a meeting) OR expose (to danger). Two very different meanings depending on context.","flag":true,"type":"vocab"},{"danish":"udtale","english":"to pronounce","context":"udtale = pronounce. Also: udtale = pronunciation (noun). 'Min udtale er dårlig' = my pronunciation is bad.","flag":false,"type":"vocab"},{"danish":"udtrykke","english":"to express","context":"","flag":false,"type":"vocab"},{"danish":"udvide","english":"to expand / extend","context":"","flag":false,"type":"vocab"},{"danish":"udvikle","english":"to develop","context":"Original had typo 'udvilke' — correct infinitive is udvikle.","flag":false,"type":"vocab"},{"danish":"uforudsigelig","english":"unpredictable","context":"","flag":false,"type":"vocab"},{"danish":"uddanne","english":"to educate / train","context":"Original 'undanner' appears to be a typo/error — correct verb is uddanne (to educate/train).","flag":true,"type":"vocab"},{"danish":"underholde","english":"to entertain","context":"","flag":false,"type":"vocab"},{"danish":"undersøge","english":"to investigate / examine","context":"","flag":false,"type":"vocab"},{"danish":"undgå","english":"to avoid","context":"","flag":false,"type":"vocab"},{"danish":"urolig","english":"worried / restless","context":"Original 'turbulent' is wrong — urolig = worried/uneasy/restless (a person). urolig = also choppy (of water). Not turbulent.","flag":true,"type":"vocab"},{"danish":"vælge","english":"to choose","context":"Original had typo 'vaelger' (present tense, Danish 'æ' written as 'ae') — infinitive is vælge.","flag":false,"type":"vocab"},{"danish":"variere","english":"to vary","context":"","flag":false,"type":"vocab"},{"danish":"vaske","english":"to wash","context":"","flag":false,"type":"vocab"},{"danish":"veje","english":"to weigh","context":"veje = weigh. Also: vej = road/way (noun). 'Hvad vejer det?' = what does it weigh?","flag":false,"type":"vocab"},{"danish":"vende","english":"to turn / turn around","context":"vende = turn/flip. 'Vend om' = turn around. vende tilbage = return.","flag":false,"type":"vocab"},{"danish":"vente","english":"to wait","context":"","flag":false,"type":"vocab"},{"danish":"vinde","english":"to win","context":"Original had capital V 'Vinde' — just a formatting error.","flag":false,"type":"vocab"}];
+const RAW_SENTENCES  = [{"danish":"Mødet er allerede startet.","english":"The meeting has already started.","verb":"være"},{"danish":"Vi har brug for mere tid.","english":"We need more time.","verb":"have"},{"danish":"Han blev hjemme med barnet.","english":"He stayed home with the child.","verb":"blive"},{"danish":"Hun gik tidligt i går.","english":"She left early yesterday.","verb":"gå"},{"danish":"Jeg kommer forbi senere.","english":"I'll stop by later.","verb":"komme"},{"danish":"Han tog ansvar for opgaven.","english":"He took responsibility for the task.","verb":"tage"},{"danish":"De gav os en klar forklaring.","english":"They gave us a clear explanation.","verb":"give"},{"danish":"Jeg fik svar i morges.","english":"I got an answer this morning.","verb":"få"},{"danish":"Hvad gør vi nu?","english":"What do we do now?","verb":"gøre"},{"danish":"Jeg ser problemet nu.","english":"I see the problem now.","verb":"se"},{"danish":"Hun sagde det meget tydeligt.","english":"She said it very clearly.","verb":"sige"},{"danish":"Han arbejder på et nyt projekt.","english":"He's working on a new project.","verb":"arbejde"},{"danish":"Vi bor tæt på skolen.","english":"We live close to the school.","verb":"bo"},{"danish":"Jeg bruger normalt cyklen.","english":"I usually use my bike.","verb":"bruge"},{"danish":"De fandt en bedre løsning.","english":"They found a better solution.","verb":"finde"},{"danish":"Jeg forstår, hvad du mener.","english":"I understand what you mean.","verb":"forstå"},{"danish":"Jeg tror, det bliver svært.","english":"I think it will be difficult.","verb":"tro"},{"danish":"Jeg ved, hvornår hun kommer.","english":"I know when she's coming.","verb":"vide"},{"danish":"Hun kunne ikke deltage.","english":"She couldn't participate.","verb":"kunne"},{"danish":"Vi skal aflevere i morgen.","english":"We must submit tomorrow.","verb":"skulle"},{"danish":"Jeg vil gerne foreslå noget.","english":"I'd like to suggest something.","verb":"ville"},{"danish":"Han måtte tage hjem tidligere.","english":"He had to go home earlier.","verb":"måtte"},{"danish":"Vi talte længe om det.","english":"We talked about it for a long time.","verb":"tale"},{"danish":"Hun lyttede uden at afbryde.","english":"She listened without interrupting.","verb":"lytte"},{"danish":"Jeg spurgte efter prisen.","english":"I asked about the price.","verb":"spørge"},{"danish":"Han svarede ikke med det samme.","english":"He didn't answer right away.","verb":"svare"},{"danish":"Kan du hjælpe mig lidt?","english":"Can you help me a bit?","verb":"hjælpe"},{"danish":"Hun elsker sit arbejde.","english":"She loves her job.","verb":"elske"},{"danish":"Jeg kan lide den løsning.","english":"I like that solution.","verb":"lide"},{"danish":"Vi spiste sammen efter mødet.","english":"We ate together after the meeting.","verb":"spise"},{"danish":"Han drikker sjældent kaffe.","english":"He rarely drinks coffee.","verb":"drikke"},{"danish":"Barnet sov dårligt i nat.","english":"The child slept badly last night.","verb":"sove"},{"danish":"De lever et roligt liv.","english":"They live a calm life.","verb":"leve"},{"danish":"Jeg købte den i går.","english":"I bought it yesterday.","verb":"købe"},{"danish":"Virksomheden betaler regningen.","english":"The company pays the bill.","verb":"betale"},{"danish":"Hun åbnede mødet.","english":"She opened the meeting.","verb":"åbne"},{"danish":"Vi lukker sagen nu.","english":"We're closing the case now.","verb":"lukke"},{"danish":"Jeg ventede næsten en time.","english":"I waited almost an hour.","verb":"vente"},{"danish":"Jeg nåede det lige.","english":"I just managed it.","verb":"nå"},{"danish":"Jeg synes, det giver mening.","english":"I think it makes sense.","verb":"synes"},{"danish":"Hvad hedder hun?","english":"What is her name?","verb":"hedde"},{"danish":"Det skete meget hurtigt.","english":"It happened very quickly.","verb":"ske"},{"danish":"Hun lagde telefonen væk.","english":"She put the phone away.","verb":"lægge"},{"danish":"Han holdt et oplæg.","english":"He gave a presentation.","verb":"holde"},{"danish":"Hun holdt op med at ryge.","english":"She quit smoking.","verb":"holde op"},{"danish":"Vi besluttede at vente.","english":"We decided to wait.","verb":"beslutte"},{"danish":"Jeg mener det alvorligt.","english":"I mean it seriously.","verb":"mene"},{"danish":"Han fulgte planen.","english":"He followed the plan.","verb":"følge"},{"danish":"De oplevede store ændringer.","english":"They experienced big changes.","verb":"opleve"},{"danish":"Hun opnåede sit mål.","english":"She achieved her goal.","verb":"opnå"},{"danish":"Vi overvejer andre muligheder.","english":"We're considering other options.","verb":"overveje"},{"danish":"Kan du forklare det igen?","english":"Can you explain it again?","verb":"forklare"},{"danish":"Jeg prøver igen i morgen.","english":"I'll try again tomorrow.","verb":"prøve"},{"danish":"Jeg forventer et svar.","english":"I expect an answer.","verb":"forvente"},{"danish":"Han fastholdt sin holdning.","english":"He maintained his position.","verb":"fastholde"},{"danish":"De aflyste mødet.","english":"They canceled the meeting.","verb":"aflyse"},{"danish":"Hun valgte den sikre løsning.","english":"She chose the safe solution.","verb":"vælge"},{"danish":"De accepterede forslaget.","english":"They accepted the proposal.","verb":"acceptere"},{"danish":"Hun afviste kritikken.","english":"She rejected the criticism.","verb":"afvise"},{"danish":"Han bekræftede aftalen.","english":"He confirmed the agreement.","verb":"bekræfte"},{"danish":"Han indrømmede sit ansvar.","english":"He admitted his responsibility.","verb":"indrømme"},{"danish":"Stillingen kræver erfaring.","english":"The position requires experience.","verb":"kræve"},{"danish":"De tillod ikke ændringer.","english":"They didn't allow changes.","verb":"tillade"},{"danish":"Han kontrollerede tallene.","english":"He checked the numbers.","verb":"kontrollere"},{"danish":"Politiet undersøgte sagen.","english":"The police investigated the case.","verb":"undersøge"},{"danish":"Resultatet overraskede alle.","english":"The result surprised everyone.","verb":"overraske"},{"danish":"Systemet fungerer nu.","english":"The system works now.","verb":"fungere"},{"danish":"Hun foreslog en ny løsning.","english":"She suggested a new solution.","verb":"foreslå"},{"danish":"De fremlagde planen for ledelsen.","english":"They presented the plan to management.","verb":"fremlægge"},{"danish":"Vi gennemgik kontrakten.","english":"We reviewed the contract.","verb":"gennemgå"},{"danish":"Mødet blev udsat.","english":"The meeting was postponed.","verb":"udsætte"},{"danish":"De tilbød fleksible vilkår.","english":"They offered flexible terms.","verb":"tilbyde"},{"danish":"Planen blev gennemført.","english":"The plan was carried out.","verb":"gennemføre"},{"danish":"De flyttede tættere på familien.","english":"They moved closer to the family.","verb":"flytte"},{"danish":"Vi besøgte dem i weekenden.","english":"We visited them over the weekend.","verb":"besøge"},{"danish":"Toget ankom til tiden.","english":"The train arrived on time.","verb":"ankomme"},{"danish":"De ændrede planen i sidste øjeblik.","english":"They changed the plan at the last moment.","verb":"ændre"},{"danish":"Virksomheden udvikler nye løsninger.","english":"The company develops new solutions.","verb":"udvikle"},{"danish":"De byggede et nyt hus.","english":"They built a new house.","verb":"bygge"},{"danish":"Projektet skabte værdi.","english":"The project created value.","verb":"skabe"},{"danish":"Vi fortsætter i morgen.","english":"We'll continue tomorrow.","verb":"fortsætte"},{"danish":"Mødet begyndte klokken ni.","english":"The meeting began at nine.","verb":"begynde"},{"danish":"Vi afsluttede diskussionen.","english":"We concluded the discussion.","verb":"afslutte"},{"danish":"Jeg foretrækker en enkel tilgang.","english":"I prefer a simple approach.","verb":"foretrække"},{"danish":"Hun bidrog aktivt til projektet.","english":"She contributed actively to the project.","verb":"bidrage"},{"danish":"De indledte forhandlinger.","english":"They initiated negotiations.","verb":"indlede"},{"danish":"Samarbejdet fungerede godt.","english":"The collaboration worked well.","verb":"fungere"},{"danish":"Jeg hentede børnene fra skole.","english":"I picked up the kids from school.","verb":"hente"},{"danish":"Kan du komme forbi i aften?","english":"Can you come by tonight?","verb":"komme"},{"danish":"Hun glemte sin taske derhjemme.","english":"She forgot her bag at home.","verb":"glemme"},{"danish":"Vi venter på svar fra dem.","english":"We're waiting for their reply.","verb":"vente"},{"danish":"Han rejser meget i sit arbejde.","english":"He travels a lot for work.","verb":"rejse"},{"danish":"Jeg er ikke klar endnu.","english":"I'm not ready yet.","verb":"være"},{"danish":"Det tager længere tid end forventet.","english":"It takes longer than expected.","verb":"tage"},{"danish":"Hun satte kaffen over.","english":"She put the coffee on.","verb":"sætte"}];
+const RAW_KEYWORDS   = [{"danish":"allerede","english":"already","sentence_da":"Jeg er allerede klar.","sentence_en":"I'm already ready."},{"danish":"altså","english":"so / that is / well","sentence_da":"Altså, hvad mener du?","sentence_en":"So, what do you mean?"},{"danish":"altid","english":"always","sentence_da":"Jeg er altid træt.","sentence_en":"I'm always tired."},{"danish":"andre","english":"others","sentence_da":"De andre kommer senere.","sentence_en":"The others are coming later."},{"danish":"bare","english":"just / simply","sentence_da":"Det er bare en idé.","sentence_en":"It's just an idea."},{"danish":"bedre","english":"better","sentence_da":"Det er meget bedre nu.","sentence_en":"It's much better now."},{"danish":"bestemt","english":"definitely","sentence_da":"Det er bestemt muligt.","sentence_en":"It's definitely possible."},{"danish":"blandt","english":"among","sentence_da":"Han er blandt venner.","sentence_en":"He's among friends."},{"danish":"både","english":"both","sentence_da":"Jeg vil både spise og hvile.","sentence_en":"I want both to eat and rest."},{"danish":"cirka","english":"approximately","sentence_da":"Det tager cirka en time.","sentence_en":"It takes about an hour."},{"danish":"derfor","english":"therefore","sentence_da":"Derfor valgte jeg det.","sentence_en":"That's why I chose it."},{"danish":"desuden","english":"additionally","sentence_da":"Desuden har vi tid.","sentence_en":"Additionally, we have time."},{"danish":"dog","english":"however","sentence_da":"Dog er det svært.","sentence_en":"However, it's difficult."},{"danish":"egentlig","english":"actually / really","sentence_da":"Det er egentlig fint.","sentence_en":"It's actually fine."},{"danish":"ellers","english":"otherwise","sentence_da":"Ellers må vi vente.","sentence_en":"Otherwise we must wait."},{"danish":"endelig","english":"finally","sentence_da":"Endelig er vi færdige.","sentence_en":"Finally we're done."},{"danish":"endnu","english":"still / yet","sentence_da":"Jeg er endnu ikke klar.","sentence_en":"I'm not ready yet."},{"danish":"faktisk","english":"in fact / actually","sentence_da":"Det er faktisk sandt.","sentence_en":"It's actually true."},{"danish":"færdig","english":"finished / done","sentence_da":"Jeg er færdig nu.","sentence_en":"I'm done now."},{"danish":"først","english":"first","sentence_da":"Først spiser vi.","sentence_en":"First we eat."},{"danish":"gerne","english":"gladly / like to","sentence_da":"Jeg hjælper gerne.","sentence_en":"I'm happy to help."},{"danish":"helt","english":"completely","sentence_da":"Det er helt klart.","sentence_en":"It's completely clear."},{"danish":"igen","english":"again","sentence_da":"Vi ses igen i morgen.","sentence_en":"See you again tomorrow."},{"danish":"især","english":"especially","sentence_da":"Især børnene var glade.","sentence_en":"Especially the kids were happy."},{"danish":"jo","english":"you know / of course","sentence_da":"Det ved du jo godt.","sentence_en":"You know that of course."},{"danish":"kun","english":"only","sentence_da":"Jeg har kun fem minutter.","sentence_en":"I only have five minutes."},{"danish":"lidt","english":"a little / a bit","sentence_da":"Vent lidt.","sentence_en":"Wait a bit."},{"danish":"meget","english":"very / much","sentence_da":"Det er meget vigtigt.","sentence_en":"It's very important."},{"danish":"mere","english":"more","sentence_da":"Jeg vil gerne have mere.","sentence_en":"I'd like some more."},{"danish":"måske","english":"maybe / perhaps","sentence_da":"Måske kommer han i morgen.","sentence_en":"Maybe he'll come tomorrow."},{"danish":"naturligvis","english":"of course","sentence_da":"Naturligvis hjælper jeg.","sentence_en":"Of course I'll help."},{"danish":"nok","english":"probably / enough","sentence_da":"Det er nok rigtigt.","sentence_en":"That's probably right."},{"danish":"normalt","english":"normally","sentence_da":"Normalt spiser vi kl. 6.","sentence_en":"Normally we eat at 6."},{"danish":"nu","english":"now","sentence_da":"Hvad gør vi nu?","sentence_en":"What do we do now?"},{"danish":"næsten","english":"almost","sentence_da":"Jeg er næsten klar.","sentence_en":"I'm almost ready."},{"danish":"også","english":"also / too","sentence_da":"Jeg vil også gerne.","sentence_en":"I'd like that too."},{"danish":"ofte","english":"often","sentence_da":"Vi ses ofte her.","sentence_en":"We often see each other here."},{"danish":"pludselig","english":"suddenly","sentence_da":"Pludselig stoppede musikken.","sentence_en":"Suddenly the music stopped."},{"danish":"rigtig","english":"really / correct","sentence_da":"Det er rigtig godt.","sentence_en":"That's really good."},{"danish":"selvfølgelig","english":"of course","sentence_da":"Selvfølgelig kan du det.","sentence_en":"Of course you can."},{"danish":"siden","english":"since / ago","sentence_da":"Jeg har ikke set ham siden.","sentence_en":"I haven't seen him since."},{"danish":"simpelthen","english":"simply","sentence_da":"Det er simpelthen for dyrt.","sentence_en":"It's simply too expensive."},{"danish":"straks","english":"immediately","sentence_da":"Kom straks!","sentence_en":"Come immediately!"},{"danish":"stadig","english":"still","sentence_da":"Han er stadig her.","sentence_en":"He's still here."},{"danish":"til sidst","english":"in the end","sentence_da":"Til sidst fandt vi det.","sentence_en":"In the end we found it."},{"danish":"tit","english":"often (informal)","sentence_da":"Vi spiser tit ude.","sentence_en":"We often eat out."},{"danish":"virkelig","english":"really / truly","sentence_da":"Det er virkelig godt.","sentence_en":"It's really good."},{"danish":"uden","english":"without","sentence_da":"Uden hjælp går det ikke.","sentence_en":"Without help, it won't work."},{"danish":"uanset","english":"regardless","sentence_da":"Uanset hvad sker det.","sentence_en":"Regardless, it happens."},{"danish":"snart","english":"soon","sentence_da":"Vi ses snart.","sentence_en":"See you soon."},{"danish":"svært","english":"difficult","sentence_da":"Det er svært at forstå.","sentence_en":"It's hard to understand."},{"danish":"typisk","english":"typically","sentence_da":"Det er typisk dansk.","sentence_en":"That's typically Danish."}];
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+function load(key, def) { try { return JSON.parse(localStorage.getItem('dansk_'+key)) || def; } catch(e) { return def; } }
+function save(key, val)  { try { localStorage.setItem('dansk_'+key, JSON.stringify(val)); } catch(e) {} }
+
+let allRatings   = load('ratings', {});   // cardId -> 'know'|'unsure'|'dunno'
+let hotList      = load('hotlist', {});   // cardId -> true
+let deck         = [];
+let currentIndex = 0;
+let isFlipped    = false;
+let currentMode  = 'all';
+let flipReversed = false;                  // false=Danish front, true=English front
+let sessionCounts = {know:0, unsure:0, dunno:0};
+let hotRoundStarted = false;
+let deckMeta     = null;                   // used in 'all' mode for hot-list append
+
+function cardId(card) {
+  return (card.danish||'').toLowerCase().replace(/\s+/g,'_').slice(0,40) + '_' + (card.type||'x');
+}
+
+// ════════════════════════════════════════════
+// DECKS
+// ════════════════════════════════════════════
+function getVocabDeck()    { return ENRICHED_VOCAB; }
+function getSentenceDeck() { return RAW_SENTENCES.map(s => ({...s, type:'sentence'})); }
+function getKeywordDeck()  { return RAW_KEYWORDS.map(k  => ({...k, type:'keyword'})); }
+
+function shuffle(arr) {
+  for (let i=arr.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function buildDeck(mode) {
+  if (mode==='vocab')    return shuffle([...getVocabDeck()]);
+  if (mode==='sentences') return shuffle([...getSentenceDeck()]);
+  if (mode==='keywords')  return shuffle([...getKeywordDeck()]);
+  if (mode==='struggle') {
+    const all = [...getVocabDeck(),...getSentenceDeck(),...getKeywordDeck()];
+    return shuffle(all.filter(c => allRatings[cardId(c)]==='dunno'));
+  }
+  if (mode==='hot') {
+    const all = [...getVocabDeck(),...getSentenceDeck(),...getKeywordDeck()];
+    return shuffle(all.filter(c => hotList[cardId(c)]));
+  }
+  return shuffle([...getVocabDeck(),...getSentenceDeck(),...getKeywordDeck()]);
+}
+
+function buildAllWithHot() {
+  const all = [...getVocabDeck(),...getSentenceDeck(),...getKeywordDeck()];
+  const hotCards = all.filter(c =>  hotList[cardId(c)]);
+  const main     = shuffle(all.filter(c => !hotList[cardId(c)]));
+  return { main, hotCards, hotStart: main.length };
+}
+
+// ════════════════════════════════════════════
+// FLIP DIRECTION TOGGLE
+// ════════════════════════════════════════════
+function toggleFlipDir() {
+  flipReversed = !flipReversed;
+  document.getElementById('flipToggle').classList.toggle('on', flipReversed);
+  document.getElementById('lblDanish').classList.toggle('active', !flipReversed);
+  document.getElementById('lblEnglish').classList.toggle('active', flipReversed);
+  if (isFlipped) {
+    isFlipped = false;
+    document.getElementById('cardWrapper').classList.remove('flipped');
+    document.getElementById('ratingArea').classList.remove('visible');
+  }
+  if (deck.length > 0 && currentIndex < deck.length) renderCard();
+}
+
+// ════════════════════════════════════════════
+// INIT & MODE SWITCHING
+// ════════════════════════════════════════════
+function initApp() {
+  setModeInternal('all');
+  updatePanels();
+  updateHotCount();
+}
+
+function setMode(mode, btn) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('aiSection').style.display = mode==='ai' ? 'block' : 'none';
+  if (mode==='ai') { currentMode='ai'; return; }
+  setModeInternal(mode);
+}
+
+function setModeInternal(mode) {
+  currentMode = mode;
+  sessionCounts = {know:0, unsure:0, dunno:0};
+  hotRoundStarted = false;
+  isFlipped = false;
+  document.getElementById('cardWrapper').classList.remove('flipped');
+  document.getElementById('ratingArea').classList.remove('visible');
+  document.getElementById('sessionDone').classList.remove('visible');
+  document.getElementById('hotDivider').classList.remove('visible');
+
+  if (mode==='all') {
+    deckMeta = buildAllWithHot();
+    deck = [...deckMeta.main, ...deckMeta.hotCards];
+  } else {
+    deckMeta = null;
+    deck = buildDeck(mode);
+  }
+  currentIndex = 0;
+
+  if ((mode==='struggle'||mode==='hot') && deck.length===0) {
+    document.getElementById('frontMain').textContent = mode==='hot' ? 'No hot list words yet!' : 'No struggling cards yet!';
+    document.getElementById('frontSub').textContent  = mode==='hot' ? 'Tap 🔥 on a card to add it' : 'Rate some cards first';
+    document.getElementById('cardTag').textContent   = '—';
+    return;
+  }
+  renderCard();
+}
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function renderCard() {
+  if (currentIndex >= deck.length) { showSessionDone(); return; }
+
+  // Hot divider banner when 'all' mode hits the hot-list section
+  if (currentMode==='all' && deckMeta && currentIndex===deckMeta.hotStart && deckMeta.hotCards.length>0 && !hotRoundStarted) {
+    hotRoundStarted = true;
+    const div = document.getElementById('hotDivider');
+    div.classList.add('visible');
+    setTimeout(() => div.classList.remove('visible'), 3000);
+  }
+
+  const card = deck[currentIndex];
+  const id   = cardId(card);
+  const isHot = !!hotList[id];
+
+  document.getElementById('cardNum').textContent     = '#'+(currentIndex+1);
+  document.getElementById('cardCounter').textContent = `Card ${currentIndex+1} of ${deck.length}`;
+  document.getElementById('hotBadge').style.display  = isHot ? 'block' : 'none';
+  document.getElementById('hotBtn').classList.toggle('active', isHot);
+
+  const cardBack = document.getElementById('cardBack');
+  const frontMain = document.getElementById('frontMain');
+  const backMain  = document.getElementById('backMain');
+  const contextNote = document.getElementById('contextNote');
+
+  if (card.type==='vocab') {
+    document.getElementById('cardTag').textContent = 'vocabulary';
+    document.getElementById('backTag').textContent = flipReversed ? 'danish' : 'english';
+    frontMain.textContent = flipReversed ? card.english : card.danish;
+    frontMain.className   = 'card-main medium';
+    document.getElementById('frontSub').textContent = '';
+    backMain.textContent  = flipReversed ? card.danish  : card.english;
+    backMain.className    = 'card-main medium';
+    document.getElementById('backSub').textContent  = '';
+    document.getElementById('conjRow').innerHTML    = '';
+    if (card.context) {
+      contextNote.style.display = 'block';
+      contextNote.className = 'context-note' + (card.flag ? ' warning' : '');
+      contextNote.textContent = (card.flag ? '⚠️ ' : '💡 ') + card.context;
+      cardBack.className = 'card-face card-back has-flag';
+    } else {
+      contextNote.style.display = 'none';
+      cardBack.className = 'card-face card-back';
+    }
+
+  } else if (card.type==='sentence') {
+    document.getElementById('cardTag').textContent = 'sentence';
+    document.getElementById('backTag').textContent = flipReversed ? 'danish' : 'english';
+    frontMain.textContent = flipReversed ? card.english : card.danish;
+    frontMain.className   = 'card-main sentence';
+    document.getElementById('frontSub').textContent = card.verb ? `verb: ${card.verb}` : '';
+    backMain.textContent  = flipReversed ? card.danish  : card.english;
+    backMain.className    = 'card-main sentence';
+    document.getElementById('backSub').textContent  = '';
+    contextNote.style.display = 'none';
+    document.getElementById('conjRow').innerHTML    = '';
+    cardBack.className = 'card-face card-back';
+
+  } else if (card.type==='keyword') {
+    document.getElementById('cardTag').textContent = 'key word';
+    document.getElementById('backTag').textContent = flipReversed ? 'danish + example' : 'english + example';
+    frontMain.textContent = flipReversed ? card.english : card.danish;
+    frontMain.className   = 'card-main';
+    document.getElementById('frontSub').textContent = '';
+    backMain.textContent  = flipReversed ? card.danish  : card.english;
+    backMain.className    = 'card-main medium';
+    document.getElementById('backSub').textContent  = flipReversed ? (card.sentence_en||'') : (card.sentence_da||'');
+    contextNote.style.display = 'none';
+    const ex = flipReversed ? card.sentence_da : card.sentence_en;
+    document.getElementById('conjRow').innerHTML = ex
+      ? `<div class="conj-item"><div class="conj-value" style="font-size:0.78rem;opacity:0.65;font-style:italic">${ex}</div></div>`
+      : '';
+    cardBack.className = 'card-face card-back';
+
+  } else {
+    // AI-generated cards (may have any shape)
+    document.getElementById('cardTag').textContent = card.type || 'card';
+    document.getElementById('backTag').textContent = flipReversed ? 'danish' : 'english';
+    frontMain.textContent = flipReversed ? (card.english||'') : (card.danish||'');
+    frontMain.className   = 'card-main medium';
+    document.getElementById('frontSub').textContent = '';
+    backMain.textContent  = flipReversed ? (card.danish||'')  : (card.english||'');
+    backMain.className    = 'card-main medium';
+    document.getElementById('backSub').textContent  = card.sentence_da || '';
+    contextNote.style.display = card.context ? 'block' : 'none';
+    if (card.context) contextNote.textContent = '💡 ' + card.context;
+    document.getElementById('conjRow').innerHTML = '';
+    cardBack.className = 'card-face card-back';
+  }
+
+  updateProgressBar();
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('cardWrapper').classList.toggle('flipped', isFlipped);
+  if (isFlipped) document.getElementById('ratingArea').classList.add('visible');
+}
+
+// ════════════════════════════════════════════
+// RATING & HOT LIST
+// ════════════════════════════════════════════
+function rateCard(rating) {
+  if (currentIndex >= deck.length) return;
+  const card = deck[currentIndex];
+  const id = cardId(card);
+  allRatings[id] = rating;
+  save('ratings', allRatings);
+  sessionCounts[rating]++;
+  updateProgressBar();
+  updatePanels();
+
+  if (rating==='dunno') {
+    // Reinsert ~5 cards ahead so it comes back soon
+    const insertAt = Math.min(currentIndex+5, deck.length);
+    deck.splice(insertAt, 0, {...card});
+  }
+  currentIndex++;
+  isFlipped = false;
+  document.getElementById('cardWrapper').classList.remove('flipped');
+  document.getElementById('ratingArea').classList.remove('visible');
+  setTimeout(renderCard, 100);
+}
+
+function toggleHot() {
+  if (currentIndex >= deck.length) return;
+  const id = cardId(deck[currentIndex]);
+  if (hotList[id]) { delete hotList[id]; } else { hotList[id] = true; }
+  save('hotlist', hotList);
+  document.getElementById('hotBtn').classList.toggle('active', !!hotList[id]);
+  document.getElementById('hotBadge').style.display = hotList[id] ? 'block' : 'none';
+  updateHotCount();
+  updatePanels();
+}
+
+function skipCard() {
+  currentIndex++;
+  isFlipped = false;
+  document.getElementById('cardWrapper').classList.remove('flipped');
+  document.getElementById('ratingArea').classList.remove('visible');
+  renderCard();
+}
+
+function shuffleDeck() {
+  if (currentMode==='all') {
+    deckMeta = buildAllWithHot();
+    deck = [...deckMeta.main, ...deckMeta.hotCards];
+  } else {
+    deck = buildDeck(currentMode);
+  }
+  currentIndex=0; isFlipped=false; hotRoundStarted=false;
+  document.getElementById('cardWrapper').classList.remove('flipped');
+  document.getElementById('ratingArea').classList.remove('visible');
+  document.getElementById('sessionDone').classList.remove('visible');
+  renderCard();
+}
+
+// ════════════════════════════════════════════
+// PROGRESS & PANELS
+// ════════════════════════════════════════════
+function updateProgressBar() {
+  const base = Math.max(currentIndex, 1);
+  document.getElementById('progKnow').style.width   = (sessionCounts.know/base*100)+'%';
+  document.getElementById('progUnsure').style.width = (sessionCounts.unsure/base*100)+'%';
+  document.getElementById('progDunno').style.width  = (sessionCounts.dunno/base*100)+'%';
+  document.getElementById('sessionStats').innerHTML =
+    `✓ ${sessionCounts.know} &nbsp;~ ${sessionCounts.unsure} &nbsp;✗ ${sessionCounts.dunno}`;
+}
+
+function updateHotCount() {
+  const n = Object.keys(hotList).length;
+  document.getElementById('hotCount').textContent    = n;
+  document.getElementById('hotListCount').textContent = n;
+}
+
+function updatePanels() {
+  const know  = Object.entries(allRatings).filter(([,v])=>v==='know');
+  const dunno = Object.entries(allRatings).filter(([,v])=>v==='dunno');
+  document.getElementById('knowCount').textContent  = know.length;
+  document.getElementById('dunnoCount').textContent = dunno.length;
+  updateHotCount();
+
+  if (document.getElementById('panelKnow').classList.contains('open'))
+    document.getElementById('panelKnow').innerHTML =
+      know.map(([k])=>`<span class="chip chip-know">${k.split('_').slice(0,-1).join(' ')}</span>`).join('');
+  if (document.getElementById('panelDunno').classList.contains('open'))
+    document.getElementById('panelDunno').innerHTML =
+      dunno.map(([k])=>`<span class="chip chip-dunno">${k.split('_').slice(0,-1).join(' ')}</span>`).join('');
+  if (document.getElementById('panelHot').classList.contains('open'))
+    document.getElementById('panelHot').innerHTML =
+      Object.keys(hotList).map(k=>`<span class="chip chip-hot">🔥 ${k.split('_').slice(0,-1).join(' ')}</span>`).join('');
+}
+
+function togglePanel(id) {
+  const body  = document.getElementById(id);
+  const arrow = document.getElementById(id+'Arrow');
+  const hdr   = body.previousElementSibling;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  arrow.classList.toggle('open',!isOpen);
+  hdr.classList.toggle('open',!isOpen);
+  if (!isOpen) updatePanels();
+}
+
+function showSessionDone() {
+  document.getElementById('sessionDone').classList.add('visible');
+  document.getElementById('ratingArea').classList.remove('visible');
+  document.getElementById('finalKnow').textContent   = sessionCounts.know;
+  document.getElementById('finalUnsure').textContent = sessionCounts.unsure;
+  document.getElementById('finalDunno').textContent  = sessionCounts.dunno;
+  document.getElementById('finalHot').textContent    = Object.keys(hotList).length;
+}
+
+function restartSession() {
+  document.getElementById('sessionDone').classList.remove('visible');
+  setModeInternal(currentMode==='ai' ? 'all' : currentMode);
+}
+
+function resetProgress() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  allRatings = {}; hotList = {};
+  save('ratings',{}); save('hotlist',{});
+  sessionCounts = {know:0,unsure:0,dunno:0};
+  updatePanels(); updateProgressBar(); updateHotCount();
+  setModeInternal('all');
+}
+
+// ════════════════════════════════════════════
+// AI GENERATE
+// ════════════════════════════════════════════
+async function generateAI() {
+  const topic = document.getElementById('aiTopic').value.trim();
+  if (!topic) return;
+  document.getElementById('aiLoading').classList.add('visible');
+
+  const prompt = `Generate 12 Danish flashcards for a B1 learner on topic: "${topic}". Living in Denmark, Danish wife, young bilingual kids — everyday practical language.
+
+Return ONLY a JSON array, no markdown. Each object:
+{"danish":"...","english":"...","type":"vocab|sentence|keyword","context":"short note if useful, else empty","sentence_da":"(keyword only)","sentence_en":"(keyword only)","verb":"(sentence only)"}
+
+Mix: ~4 vocab verbs/words, ~5 short natural sentences (5-10 words), ~3 key connector words.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    const data = await res.json();
+    const text = data.content.map(c=>c.text||'').join('');
+    const cards = JSON.parse(text.replace(/```json|```/g,'').trim());
+    deck = shuffle(cards);
+    currentIndex=0; isFlipped=false; sessionCounts={know:0,unsure:0,dunno:0};
+    document.getElementById('sessionDone').classList.remove('visible');
+    renderCard();
+  } catch(e) {
+    alert('Could not generate cards — try again.');
+    console.error(e);
+  } finally {
+    document.getElementById('aiLoading').classList.remove('visible');
+  }
+}
+
+document.getElementById('aiTopic').addEventListener('keydown', e => { if(e.key==='Enter') generateAI(); });
+
+// ════════════════════════════════════════════
+// START
+// ════════════════════════════════════════════
+initApp();
+</script>
+</body>
+</html>
