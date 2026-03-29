@@ -640,20 +640,6 @@ function rateCard(rating) {
   sessionCounts[rating]++;
   sessionSeen[id] = rating;
 
-  if (rating === 'know') {
-    if (!masteredWords[id]) masteredWords[id] = {count:0, sessions:[]};
-    const today = new Date().toDateString();
-    const sessions = masteredWords[id].sessions;
-    if (sessions[sessions.length-1] !== today) sessions.push(today);
-    masteredWords[id].count = sessions.length;
-    if (sessions.length >= 3) {
-      masteredWords[id].graduated = true;
-      save('mastered', masteredWords);
-      deck = deck.filter((c,i) => i <= currentIndex || cardId(c) !== id);
-    }
-    save('mastered', masteredWords);
-  }
-
   if (rating==='dunno') {
     const insertAt = Math.min(currentIndex+5, deck.length);
     deck.splice(insertAt, 0, {...card});
