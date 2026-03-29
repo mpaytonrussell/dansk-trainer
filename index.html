@@ -55,6 +55,8 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
 .mode-btn:hover { border-color:var(--accent); color:var(--accent); }
 .mode-btn.active { background:#2e4a7a; border-color:#2e4a7a; color:#e8e4dc; }
 .mode-btn.fire-mode { border-color:var(--fire); color:#e07040; }
+.mode-btn.mastered-mode { border-color:#8a7a30; color:#c9b84a; }
+.mode-btn.mastered-mode.active { background:#8a7a30; color:#111318; }
 .mode-btn.fire-mode.active { background:var(--fire); color:#111318; }
 
 /* ── PROGRESS ── */
@@ -134,7 +136,10 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
 .r-know  { border-color:var(--know); color:var(--know); }
 .r-unsure{ border-color:var(--unsure); color:var(--unsure); }
 .r-dunno { border-color:var(--dunno); color:var(--dunno); }
-.r-hot   { border-color:var(--fire); color:var(--fire); }
+.r-hot    { border-color:var(--fire); color:var(--fire); }
+.r-master { border-color:#8a7a30; color:#c9b84a; }
+.r-master:hover { background:#8a7a30; color:#111318; }
+.r-master.active { background:#8a7a30; color:#111318; }
 .r-know:hover  { background:var(--know); color:#111318; }
 .r-unsure:hover{ background:var(--unsure); color:#111318; }
 .r-dunno:hover { background:var(--dunno); color:#111318; }
@@ -164,7 +169,8 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
 .s-know  { background:var(--know-bg); color:var(--know); }
 .s-unsure{ background:var(--unsure-bg); color:var(--unsure); }
 .s-dunno { background:var(--dunno-bg); color:var(--dunno); }
-.s-hot   { background:var(--hot-bg); color:var(--hot); }
+.s-hot    { background:var(--hot-bg); color:var(--hot); }
+.s-master { background:#1a1808; color:#c9b84a; }
 
 /* ── PANELS ── */
 .panel { background:var(--surface); border:1.5px solid var(--border); border-radius:4px; overflow:hidden; margin-bottom:12px; }
@@ -185,7 +191,8 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
 .chip-know  { background:var(--know-bg); color:var(--know); border:1px solid #c0ddc9; }
 .chip-unsure{ background:var(--unsure-bg); color:var(--unsure); border:1px solid #e8d4a0; }
 .chip-dunno { background:var(--dunno-bg); color:var(--dunno); border:1px solid #ddb8b0; }
-.chip-hot   { background:var(--hot-bg); color:var(--hot); border:1px solid #f0c0a0; }
+.chip-hot    { background:var(--hot-bg); color:var(--hot); border:1px solid #f0c0a0; }
+.chip-master { background:#1a1808; color:#c9b84a; border:1px solid #4a4020; }
 
 /* ── AI SECTION ── */
 .ai-section { background:var(--surface); border:1.5px solid var(--border); border-radius:4px; padding:18px; margin-bottom:16px; display:none; }
@@ -263,6 +270,7 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
   <button class="mode-btn" onclick="setMode('keywords',this)">Key Words</button>
   <button class="mode-btn" onclick="setMode('struggle',this)">Struggling</button>
   <button class="mode-btn fire-mode" onclick="setMode('hot',this)">🔥 Hot List (<span id="hotCount">0</span>)</button>
+  <button class="mode-btn mastered-mode" onclick="setMode('mastered',this)">⭐ Mastered (<span id="masteredCount">0</span>)</button>
   <button class="mode-btn" onclick="setMode('ai',this)">AI Generate</button>
 </div>
 
@@ -320,6 +328,7 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
     <button class="rate-btn r-unsure" onclick="rateCard('unsure')"><span class="em">😐</span><span class="lb">Getting there</span></button>
     <button class="rate-btn r-know"   onclick="rateCard('know')"><span class="em">😊</span><span class="lb">Got it!</span></button>
     <button class="rate-btn r-hot" id="hotBtn" onclick="toggleHot()"><span class="em">🔥</span><span class="lb">Hot List</span></button>
+    <button class="rate-btn r-master" id="masterBtn" onclick="masterCard()"><span class="em">⭐</span><span class="lb">Mastered</span></button>
   </div>
 
   <!-- Session done -->
@@ -331,6 +340,7 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
       <div class="score-box s-unsure"><div class="num" id="finalUnsure">0</div><div class="lbl">Getting there</div></div>
       <div class="score-box s-dunno"><div class="num" id="finalDunno">0</div><div class="lbl">Still learning</div></div>
       <div class="score-box s-hot"><div class="num" id="finalHot">0</div><div class="lbl">🔥 Hot</div></div>
+      <div class="score-box s-master"><div class="num" id="finalMastered">0</div><div class="lbl">⭐ Mastered</div></div>
     </div>
     <button class="ctrl-btn primary" onclick="restartSession()">Go again</button>
     &nbsp;
@@ -342,12 +352,20 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
 
 <!-- Controls -->
 <div class="controls">
+  <button class="ctrl-btn" onclick="goBack()">← Back</button>
   <button class="ctrl-btn" onclick="shuffleDeck()">↺ Shuffle</button>
   <button class="ctrl-btn" onclick="skipCard()">Skip →</button>
   <button class="ctrl-btn" onclick="resetProgress()">Reset scores</button>
 </div>
 
 <!-- Panels -->
+<div class="panel">
+  <div class="panel-hdr" onclick="togglePanel('panelMastered')">
+    <h3>⭐ Mastered — retired from deck (<span id="masteredPanelCount">0</span>)</h3>
+    <span class="arrow" id="panelMasteredArrow">▼</span>
+  </div>
+  <div class="panel-body" id="panelMastered"></div>
+</div>
 <div class="panel">
   <div class="panel-hdr" onclick="togglePanel('panelKnow')">
     <h3>📗 Words I know (<span id="knowCount">0</span>)</h3>
@@ -386,14 +404,18 @@ const RAW_KEYWORDS   = [{"danish":"allerede","english":"already","sentence_da":"
 function load(key, def) { try { return JSON.parse(localStorage.getItem('dansk_'+key)) || def; } catch(e) { return def; } }
 function save(key, val)  { try { localStorage.setItem('dansk_'+key, JSON.stringify(val)); } catch(e) {} }
 
-let allRatings   = load('ratings', {});   // cardId -> 'know'|'unsure'|'dunno'
-let hotList      = load('hotlist', {});   // cardId -> true
+let allRatings    = load('ratings', {});     // cardId -> 'know'|'unsure'|'dunno'
+let hotList       = load('hotlist', {});     // cardId -> true
+let masteredWords = load('mastered', {});    // cardId -> {count, sessions:[]}
+let sessionSeen   = {};                      // cardIds seen this session -> true
+let lastCard      = null;                    // for back button
+let lastIndex     = -1;
 let deck         = [];
 let currentIndex = 0;
 let isFlipped    = false;
 let currentMode  = 'all';
 let flipReversed = false;                  // false=Danish front, true=English front
-let sessionCounts = {know:0, unsure:0, dunno:0};
+let sessionCounts = {know:0, unsure:0, dunno:0, mastered:0};
 let hotRoundStarted = false;
 let deckMeta     = null;                   // used in 'all' mode for hot-list append
 
@@ -416,25 +438,26 @@ function shuffle(arr) {
   return arr;
 }
 
+function isMastered(c) { return !!masteredWords[cardId(c)]; }
+
 function buildDeck(mode) {
-  if (mode==='vocab')    return shuffle([...getVocabDeck()]);
-  if (mode==='sentences') return shuffle([...getSentenceDeck()]);
-  if (mode==='keywords')  return shuffle([...getKeywordDeck()]);
-  if (mode==='struggle') {
-    const all = [...getVocabDeck(),...getSentenceDeck(),...getKeywordDeck()];
-    return shuffle(all.filter(c => allRatings[cardId(c)]==='dunno'));
-  }
-  if (mode==='hot') {
-    const all = [...getVocabDeck(),...getSentenceDeck(),...getKeywordDeck()];
-    return shuffle(all.filter(c => hotList[cardId(c)]));
-  }
-  return shuffle([...getVocabDeck(),...getSentenceDeck(),...getKeywordDeck()]);
+  const all = [...getVocabDeck(),...getSentenceDeck(),...getKeywordDeck()];
+  if (mode==='mastered') return shuffle(all.filter(c => isMastered(c)));
+  if (mode==='struggle') return shuffle(all.filter(c => allRatings[cardId(c)]==='dunno' && !isMastered(c)));
+  if (mode==='hot')      return shuffle(all.filter(c => hotList[cardId(c)] && !isMastered(c)));
+  // For all other modes, exclude mastered cards
+  const active = all.filter(c => !isMastered(c));
+  if (mode==='vocab')     return shuffle(active.filter(c => c.type==='vocab'));
+  if (mode==='sentences') return shuffle(active.filter(c => c.type==='sentence'));
+  if (mode==='keywords')  return shuffle(active.filter(c => c.type==='keyword'));
+  return shuffle(active);
 }
 
 function buildAllWithHot() {
   const all = [...getVocabDeck(),...getSentenceDeck(),...getKeywordDeck()];
-  const hotCards = all.filter(c =>  hotList[cardId(c)]);
-  const main     = shuffle(all.filter(c => !hotList[cardId(c)]));
+  const active = all.filter(c => !isMastered(c));
+  const hotCards = active.filter(c =>  hotList[cardId(c)]);
+  const main     = shuffle(active.filter(c => !hotList[cardId(c)]));
   return { main, hotCards, hotStart: main.length };
 }
 
@@ -473,7 +496,9 @@ function setMode(mode, btn) {
 
 function setModeInternal(mode) {
   currentMode = mode;
-  sessionCounts = {know:0, unsure:0, dunno:0};
+  sessionCounts = {know:0, unsure:0, dunno:0, mastered:0};
+  sessionSeen = {};
+  lastCard = null; lastIndex = -1;
   hotRoundStarted = false;
   isFlipped = false;
   document.getElementById('cardWrapper').classList.remove('flipped');
@@ -521,6 +546,7 @@ function renderCard() {
   document.getElementById('cardCounter').textContent = `Card ${currentIndex+1} of ${deck.length}`;
   document.getElementById('hotBadge').style.display  = isHot ? 'block' : 'none';
   document.getElementById('hotBtn').classList.toggle('active', isHot);
+  document.getElementById('masterBtn').classList.toggle('active', isMastered(card));
 
   const cardBack = document.getElementById('cardBack');
   const frontMain = document.getElementById('frontMain');
@@ -608,22 +634,97 @@ function rateCard(rating) {
   if (currentIndex >= deck.length) return;
   const card = deck[currentIndex];
   const id = cardId(card);
+
+  // Save for back button
+  lastCard = {...card, _rating: rating};
+  lastIndex = currentIndex;
+
   allRatings[id] = rating;
   save('ratings', allRatings);
   sessionCounts[rating]++;
-  updateProgressBar();
-  updatePanels();
+  sessionSeen[id] = rating;
+
+  // Track consecutive 'know' sessions for auto-graduation
+  if (rating === 'know') {
+    if (!masteredWords[id]) masteredWords[id] = {count:0, sessions:[]};
+    const today = new Date().toDateString();
+    const sessions = masteredWords[id].sessions;
+    if (sessions[sessions.length-1] !== today) sessions.push(today);
+    masteredWords[id].count = sessions.length;
+    if (sessions.length >= 3) {
+      // Auto-graduate
+      masteredWords[id].graduated = true;
+      save('mastered', masteredWords);
+      // Remove remaining copies from current deck
+      deck = deck.filter((c,i) => i <= currentIndex || cardId(c) !== id);
+    }
+    save('mastered', masteredWords);
+  }
 
   if (rating==='dunno') {
-    // Reinsert ~5 cards ahead so it comes back soon
+    // Reinsert ~5 cards ahead
     const insertAt = Math.min(currentIndex+5, deck.length);
     deck.splice(insertAt, 0, {...card});
   }
+
   currentIndex++;
   isFlipped = false;
   document.getElementById('cardWrapper').classList.remove('flipped');
   document.getElementById('ratingArea').classList.remove('visible');
+
+  updateProgressBar();
+  updatePanels();
   setTimeout(renderCard, 100);
+}
+
+function masterCard() {
+  if (currentIndex >= deck.length) return;
+  const card = deck[currentIndex];
+  const id = cardId(card);
+  const isAlreadyMastered = !!masteredWords[id];
+
+  if (isAlreadyMastered) {
+    // Un-master it
+    delete masteredWords[id];
+    save('mastered', masteredWords);
+    document.getElementById('masterBtn').classList.remove('active');
+  } else {
+    // Manually master
+    masteredWords[id] = { count:3, sessions:['manual'], graduated:true };
+    save('mastered', masteredWords);
+    document.getElementById('masterBtn').classList.add('active');
+    sessionCounts.mastered++;
+    // Move past this card
+    currentIndex++;
+    isFlipped = false;
+    document.getElementById('cardWrapper').classList.remove('flipped');
+    document.getElementById('ratingArea').classList.remove('visible');
+    updatePanels();
+    setTimeout(renderCard, 100);
+    return;
+  }
+  updatePanels();
+}
+
+function goBack() {
+  if (lastCard === null || lastIndex < 0) return;
+  // Undo the rating
+  const id = cardId(lastCard);
+  const prevRating = lastCard._rating;
+  if (prevRating) {
+    sessionCounts[prevRating] = Math.max(0, sessionCounts[prevRating]-1);
+    delete allRatings[id];
+    delete sessionSeen[id];
+    save('ratings', allRatings);
+  }
+  currentIndex = lastIndex;
+  lastCard = null; lastIndex = -1;
+  isFlipped = false;
+  document.getElementById('cardWrapper').classList.remove('flipped');
+  document.getElementById('ratingArea').classList.remove('visible');
+  updateProgressBar();
+  updatePanels();
+  renderCard();
 }
 
 function toggleHot() {
@@ -678,10 +779,13 @@ function updateHotCount() {
 }
 
 function updatePanels() {
-  const know  = Object.entries(allRatings).filter(([,v])=>v==='know');
-  const dunno = Object.entries(allRatings).filter(([,v])=>v==='dunno');
-  document.getElementById('knowCount').textContent  = know.length;
-  document.getElementById('dunnoCount').textContent = dunno.length;
+  const know   = Object.entries(allRatings).filter(([,v])=>v==='know');
+  const dunno  = Object.entries(allRatings).filter(([,v])=>v==='dunno');
+  const master = Object.keys(masteredWords);
+  document.getElementById('knowCount').textContent       = know.length;
+  document.getElementById('dunnoCount').textContent      = dunno.length;
+  document.getElementById('masteredCount').textContent   = master.length;
+  document.getElementById('masteredPanelCount').textContent = master.length;
   updateHotCount();
 
   if (document.getElementById('panelKnow').classList.contains('open'))
@@ -693,6 +797,9 @@ function updatePanels() {
   if (document.getElementById('panelHot').classList.contains('open'))
     document.getElementById('panelHot').innerHTML =
       Object.keys(hotList).map(k=>`<span class="chip chip-hot">🔥 ${k.split('_').slice(0,-1).join(' ')}</span>`).join('');
+  if (document.getElementById('panelMastered').classList.contains('open'))
+    document.getElementById('panelMastered').innerHTML =
+      master.map(k=>`<span class="chip chip-master">⭐ ${k.split('_').slice(0,-1).join(' ')}</span>`).join('');
 }
 
 function togglePanel(id) {
@@ -712,7 +819,8 @@ function showSessionDone() {
   document.getElementById('finalKnow').textContent   = sessionCounts.know;
   document.getElementById('finalUnsure').textContent = sessionCounts.unsure;
   document.getElementById('finalDunno').textContent  = sessionCounts.dunno;
-  document.getElementById('finalHot').textContent    = Object.keys(hotList).length;
+  document.getElementById('finalHot').textContent      = Object.keys(hotList).length;
+  document.getElementById('finalMastered').textContent  = Object.keys(masteredWords).length;
 }
 
 function restartSession() {
@@ -722,9 +830,10 @@ function restartSession() {
 
 function resetProgress() {
   if (!confirm('Reset all progress? This cannot be undone.')) return;
-  allRatings = {}; hotList = {};
-  save('ratings',{}); save('hotlist',{});
-  sessionCounts = {know:0,unsure:0,dunno:0};
+  allRatings = {}; hotList = {}; masteredWords = {};
+  save('ratings',{}); save('hotlist',{}); save('mastered',{});
+  sessionCounts = {know:0,unsure:0,dunno:0,mastered:0};
+  sessionSeen={}; lastCard=null; lastIndex=-1;
   updatePanels(); updateProgressBar(); updateHotCount();
   setModeInternal('all');
 }
