@@ -925,7 +925,9 @@ function loadVoices() {
   const all = synth.getVoices();
   if (!all.length) return;
   danishVoice =
+    all.find(v => /magnus/i.test(v.name)) ||
     all.find(v => v.lang.startsWith('da') && /enhanced|premium/i.test(v.name)) ||
+    all.find(v => v.lang.startsWith('da') && /sara/i.test(v.name)) ||
     all.find(v => v.lang === 'da-DK') ||
     all.find(v => v.lang.startsWith('da')) ||
     null;
