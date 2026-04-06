@@ -923,9 +923,12 @@ let audioPlaying  = false;
 
 function loadVoices() {
   const all = synth.getVoices();
-  danishVoice = all.find(v => v.lang === 'da-DK') ||
-                all.find(v => v.lang.startsWith('da')) ||
-                null;
+  if (!all.length) return;
+  danishVoice =
+    all.find(v => v.lang.startsWith('da') && /enhanced|premium/i.test(v.name)) ||
+    all.find(v => v.lang === 'da-DK') ||
+    all.find(v => v.lang.startsWith('da')) ||
+    null;
 }
 loadVoices();
 if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
@@ -938,6 +941,7 @@ function getDanishText(card) {
 
 function speakText(text) {
   if (!text) return;
+  loadVoices();   // re-check on every call — iOS loads voices lazily
   synth.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang  = 'da-DK';
@@ -969,13 +973,4 @@ function setSpeed(rate, btn) {
 
 function toggleAutoPlay() {
   autoPlay = !autoPlay;
-  document.getElementById('autoTrack').classList.toggle('on', autoPlay);
-}
-
-// ════════════════════════════════════════════
-// START
-// ════════════════════════════════════════════
-initApp();
-</script>
-</body>
-</html>
+  document.getElementById('autoTrack').classList.toggle('on
