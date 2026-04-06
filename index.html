@@ -344,9 +344,9 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
 <!-- Audio controls -->
 <div class="audio-controls" id="audioControls">
   <label>Speed:</label>
-  <button class="speed-btn" onclick="setSpeed(0.6,this)">Slow</button>
-  <button class="speed-btn active" onclick="setSpeed(0.88,this)">Normal</button>
-  <button class="speed-btn" onclick="setSpeed(1.1,this)">Fast</button>
+  <button class="speed-btn" onclick="setSpeed(0.7,this)">Slow</button>
+  <button class="speed-btn active" onclick="setSpeed(1.0,this)">Normal</button>
+  <button class="speed-btn" onclick="setSpeed(1.3,this)">Fast</button>
   <div class="auto-toggle">
     <button class="auto-track" id="autoTrack" onclick="toggleAutoPlay()" aria-label="Auto-play"></button>
     <label style="cursor:pointer" onclick="toggleAutoPlay()">Auto-play</label>
@@ -672,7 +672,7 @@ function renderCard() {
   updateProgressBar();
 
   // Auto-play Danish audio if enabled
-  synth.cancel();
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   audioPlaying = false;
   document.getElementById('audioBtn').classList.remove('playing');
   if (autoPlay) {
@@ -913,57 +913,53 @@ Mix: ~4 vocab verbs/words, ~5 short natural sentences (5-10 words), ~3 key conne
 document.getElementById('aiTopic').addEventListener('keydown', e => { if(e.key==='Enter') generateAI(); });
 
 // ════════════════════════════════════════════
-// AUDIO — Web Speech API (da-DK)
+// AUDIO — Google Translate TTS (reliable on iOS, no API key needed)
 // ════════════════════════════════════════════
-const synth = window.speechSynthesis;
-let danishVoice   = null;
-let audioSpeed    = 0.88;
-let autoPlay      = false;
-let audioPlaying  = false;
-
-function loadVoices() {
-  const all = synth.getVoices();
-  if (!all.length) return;
-  danishVoice =
-    all.find(v => /magnus/i.test(v.name)) ||
-    all.find(v => v.lang.startsWith('da') && /enhanced|premium/i.test(v.name)) ||
-    all.find(v => v.lang.startsWith('da') && /sara/i.test(v.name)) ||
-    all.find(v => v.lang === 'da-DK') ||
-    all.find(v => v.lang.startsWith('da')) ||
-    null;
-}
-loadVoices();
-if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+let audioSpeed   = 1.0;
+let autoPlay     = false;
+let audioPlaying = false;
+let currentAudio = null;
 
 function getDanishText(card) {
   if (!card) return null;
-  // Always speak the Danish side regardless of flip direction
   return card.danish || card.da || null;
 }
 
 function speakText(text) {
   if (!text) return;
-  loadVoices();   // re-check on every call — iOS loads voices lazily
-  synth.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang  = 'da-DK';
-  u.rate  = audioSpeed;
-  u.pitch = 1.0;
-  if (danishVoice) u.voice = danishVoice;
-  u.onstart = () => {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+
+  const slow = audioSpeed < 0.9 ? '&slow=true' : '';
+  const url  = 'https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=da&client=gtx&q='
+               + encodeURIComponent(text) + slow;
+
+  const audio = new Audio(url);
+  currentAudio = audio;
+  if (audioSpeed >= 0.9) audio.playbackRate = audioSpeed;
+
+  audio.onplay = () => {
     audioPlaying = true;
     document.getElementById('audioBtn').classList.add('playing');
   };
-  u.onend = u.onerror = () => {
+  audio.onended = audio.onerror = () => {
     audioPlaying = false;
+    currentAudio = null;
     document.getElementById('audioBtn').classList.remove('playing');
   };
-  synth.speak(u);
+  audio.play().catch(() => {
+    audioPlaying = false;
+    document.getElementById('audioBtn').classList.remove('playing');
+  });
 }
 
 function speakCurrent(e) {
-  if (e) e.stopPropagation();   // don't flip the card
-  if (audioPlaying) { synth.cancel(); audioPlaying = false; document.getElementById('audioBtn').classList.remove('playing'); return; }
+  if (e) e.stopPropagation();
+  if (audioPlaying) {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    audioPlaying = false;
+    document.getElementById('audioBtn').classList.remove('playing');
+    return;
+  }
   if (currentIndex < deck.length) speakText(getDanishText(deck[currentIndex]));
 }
 
