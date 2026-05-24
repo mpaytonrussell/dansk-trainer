@@ -891,6 +891,7 @@ function populateScoreInputs(round) {
   const rk = roundKey(round);
   document.getElementById('score-inputs').innerHTML = PLAYERS.map(p => {
     const pk = playerKey(p);
+    const sid = pk; // use sanitized key as input ID suffix — no spaces
     const existing = (scores[rk] && scores[rk][pk]) || {};
     const g = existing.gross != null ? existing.gross : '';
     const n = existing.net != null ? existing.net : '';
@@ -901,15 +902,15 @@ function populateScoreInputs(round) {
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.4rem">
         <div>
           <label style="display:block;font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px">Gross</label>
-          <input type="number" id="gross-${p}" placeholder="—" min="60" max="130" value="${g}" style="width:100%;padding:0.45rem 0.4rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--cream);text-align:center">
+          <input type="number" id="gross-${sid}" placeholder="—" min="60" max="130" value="${g}" style="width:100%;padding:0.45rem 0.4rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--cream);text-align:center">
         </div>
         <div>
           <label style="display:block;font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px">Net</label>
-          <input type="number" id="net-${p}" placeholder="—" min="50" max="130" value="${n}" style="width:100%;padding:0.45rem 0.4rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--cream);text-align:center">
+          <input type="number" id="net-${sid}" placeholder="—" min="50" max="130" value="${n}" style="width:100%;padding:0.45rem 0.4rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--cream);text-align:center">
         </div>
         <div>
           <label style="display:block;font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px">Stbl</label>
-          <input type="number" id="stbl-${p}" placeholder="—" min="0" max="50" value="${s}" style="width:100%;padding:0.45rem 0.4rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--cream);text-align:center">
+          <input type="number" id="stbl-${sid}" placeholder="—" min="0" max="50" value="${s}" style="width:100%;padding:0.45rem 0.4rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--cream);text-align:center">
         </div>
       </div>
     </div>`;
@@ -926,10 +927,10 @@ async function saveScores() {
   if (!scores[roundKey]) scores[roundKey] = {};
 
   for (const p of PLAYERS) {
-    const pKey = p.replace(/[^a-zA-Z0-9]/g,'_');
-    const g = document.getElementById('gross-'+p).value;
-    const n = document.getElementById('net-'+p).value;
-    const s = document.getElementById('stbl-'+p).value;
+    const pKey = playerKey(p);
+    const g = document.getElementById('gross-'+pKey).value;
+    const n = document.getElementById('net-'+pKey).value;
+    const s = document.getElementById('stbl-'+pKey).value;
     if (g || n || s) {
       if (!scores[roundKey][pKey]) scores[roundKey][pKey] = {};
       if (g) scores[roundKey][pKey].gross = parseInt(g);
