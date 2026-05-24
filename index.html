@@ -613,24 +613,7 @@
       </div>
       <a class="cl-link" href="https://maps.app.goo.gl/dunvegan-st-andrews" target="_blank">↗</a>
     </div>
-    <div class="cl-item" data-id="keys">
-      <div class="cl-box"><span class="cl-tick">✓</span></div>
-      <div class="cl-info">
-        <div class="cl-name">Keys Bar</div>
-        <div class="cl-sub">The caddy bar — best place to hang with locals</div>
-        <span class="cl-tag cl-tag-pub">Pub</span>
-      </div>
-      <a class="cl-link" href="https://www.google.com/maps/search/Keys+Bar+St+Andrews" target="_blank">↗</a>
-    </div>
-    <div class="cl-item" data-id="wheypat">
-      <div class="cl-box"><span class="cl-tick">✓</span></div>
-      <div class="cl-info">
-        <div class="cl-name">Whey Pat Tavern</div>
-        <div class="cl-sub">Second local option — good crack with the St Andrews regulars</div>
-        <span class="cl-tag cl-tag-pub">Pub</span>
-      </div>
-      <a class="cl-link" href="https://www.google.com/maps/search/Whey+Pat+Tavern+St+Andrews" target="_blank">↗</a>
-    </div>
+
     <div class="cl-item" data-id="roadholebar">
       <div class="cl-box"><span class="cl-tick">✓</span></div>
       <div class="cl-info">
@@ -674,15 +657,6 @@
       </div>
       <a class="cl-link" href="https://www.balgove.com" target="_blank">↗</a>
     </div>
-    <div class="cl-item" data-id="thesaint">
-      <div class="cl-box"><span class="cl-tick">✓</span></div>
-      <div class="cl-info">
-        <div class="cl-name">The Saint</div>
-        <div class="cl-sub">Steak dinner right in town if you want to skip the cab</div>
-        <span class="cl-tag cl-tag-food">Food</span>
-      </div>
-      <a class="cl-link" href="https://www.google.com/maps/search/The+Saint+Restaurant+St+Andrews" target="_blank">↗</a>
-    </div>
     <div class="cl-item" data-id="saintssizzle">
       <div class="cl-box"><span class="cl-tick">✓</span></div>
       <div class="cl-info">
@@ -723,7 +697,7 @@
       <div class="cl-box"><span class="cl-tick">✓</span></div>
       <div class="cl-info">
         <div class="cl-name">Anstruther Fish Bar</div>
-        <div class="cl-sub">~25 min drive — multi-award-winning chippy right on the harbour</div>
+        <div class="cl-sub">~25 min drive — award-winning chippy on the harbour. Anstruther Golf Club (Old Tom Morris, 9 holes) is literally next door.</div>
         <span class="cl-tag cl-tag-food">Food</span>
       </div>
       <a class="cl-link" href="https://www.anstrutherfishbar.co.uk" target="_blank">↗</a>
@@ -752,6 +726,15 @@
         <span class="cl-tag cl-tag-activity">Activity</span>
       </div>
       <a class="cl-link" href="https://www.google.com/maps/search/Cathedral+Cemetery+St+Andrews" target="_blank">↗</a>
+    </div>
+    <div class="cl-item" data-id="walkingtour">
+      <div class="cl-box"><span class="cl-tick">✓</span></div>
+      <div class="cl-info">
+        <div class="cl-name">Walking Tour of St Andrews</div>
+        <div class="cl-sub">Cathedral ruins, castle, West Sands, Old Course — 90 min self-guided or guided tour</div>
+        <span class="cl-tag cl-tag-activity">Activity</span>
+      </div>
+      <a class="cl-link" href="https://www.visitstandrews.com/things-to-do/walking-tours" target="_blank">↗</a>
     </div>
   </div>
 
@@ -970,7 +953,8 @@ function getVal(round, player, type) {
   const d = scores[rk] && scores[rk][pk];
   if (!d) return null;
   if (typeof d === 'number') return type === 'gross' ? d : null;
-  return d[type] != null ? d[type] : null;
+  const key = type === 'stableford' ? 'stbl' : type;
+  return d[key] != null ? d[key] : null;
 }
 
 function rankLabel(i) { return i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''; }
