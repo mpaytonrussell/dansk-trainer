@@ -612,6 +612,7 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
     <button class="mode-btn active" onclick="setListenMode('all',this)">All sentences</button>
     <button class="mode-btn" onclick="setListenMode('struggle',this)">Struggling</button>
     <button class="mode-btn fire-mode" onclick="setListenMode('hot',this)">🔥 Missed (<span id="listenHotCount">0</span>)</button>
+    <button class="mode-btn mastered-mode" onclick="setListenMode('mastered',this)">⭐ Mastered (<span id="listenMasteredCount">0</span>)</button>
   </div>
 
   <div class="progress-section">
@@ -643,6 +644,7 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
     <button class="rate-btn r-dunno"  onclick="rateListen('dunno')"><span class="em">😕</span><span class="lb">Missed it</span></button>
     <button class="rate-btn r-unsure" onclick="rateListen('unsure')"><span class="em">😐</span><span class="lb">Partly</span></button>
     <button class="rate-btn r-know"   onclick="rateListen('know')"><span class="em">😊</span><span class="lb">Understood!</span></button>
+    <button class="rate-btn r-master" id="listenMasterBtn" onclick="masterListen()"><span class="em">⭐</span><span class="lb">Mastered</span></button>
   </div>
 
   <div class="controls">
@@ -1433,7 +1435,8 @@ function saveSettings()  {
 // v2.0 — LYT (LISTENING MODE)
 // ════════════════════════════════════════════
 let listenDeck = [], listenIndex = 0, listenModeName = 'all';
-let listenRatings = load('listenRatings', {});
+let listenRatings  = load('listenRatings', {});
+let listenMastered = load('listenMastered', {});
 let listenSession = {know:0, unsure:0, dunno:0};
 let listenStage = 0; // 0 hidden, 1 danish shown, 2 english shown
 
@@ -1462,8 +1465,12 @@ function setListenMode(m, btn) {
 function setListenModeInternal(m) {
   listenModeName = m;
   let pool = buildListenPool();
-  if (m==='struggle') pool = pool.filter(s => ['unsure','dunno'].includes(listenRatings[s.danish]));
-  if (m==='hot')      pool = pool.filter(s => listenRatings[s.danish]==='dunno');
+  if (m==='mastered') pool = pool.filter(s => listenMastered[s.danish]);
+  else {
+    pool = pool.filter(s => !listenMastered[s.danish]);
+    if (m==='struggle') pool = pool.filter(s => ['unsure','dunno'].includes(listenRatings[s.danish]));
+    if (m==='hot')      pool = pool.filter(s => listenRatings[s.danish]==='dunno');
+  }
   listenDeck = shuffle(pool);
   listenIndex = 0;
   listenSession = {know:0, unsure:0, dunno:0};
@@ -1479,7 +1486,9 @@ function renderListenCard(autoplay) {
   document.getElementById('listenStats').innerHTML =
     `✓ ${listenSession.know} &nbsp;~ ${listenSession.unsure} &nbsp;✗ ${listenSession.dunno}`;
   document.getElementById('listenHotCount').textContent =
-    Object.values(listenRatings).filter(v=>v==='dunno').length;
+    Object.entries(listenRatings).filter(([k,v])=>v==='dunno' && !listenMastered[k]).length;
+  document.getElementById('listenMasteredCount').textContent =
+    Object.keys(listenMastered).length;
   if (c && autoplay) listenPlay();
 }
 
@@ -1495,7 +1504,10 @@ function updateListenUI() {
   }
   document.getElementById('revealDaBtn').style.display = (has && listenStage===0) ? '' : 'none';
   document.getElementById('revealEnBtn').style.display = (has && listenStage===1) ? '' : 'none';
-  document.getElementById('listenRating').style.display = (has && listenStage>=1) ? '' : 'none';
+  document.getElementById('listenRating').style.display = has ? '' : 'none';
+  const mBtn = document.getElementById('listenMasterBtn');
+  if (mBtn) mBtn.querySelector('.lb').textContent =
+    (has && listenMastered[c.danish]) ? 'Un-master' : 'Mastered';
   document.getElementById('listenStage').textContent =
     !has ? 'Nothing here — go rate some sentences first' :
     listenStage===0 ? 'Listen — what do you hear?' :
@@ -1524,6 +1536,24 @@ function rateListen(r) {
   save('listenRatings', listenRatings);
   listenSession[r]++;
   listenAdvance();
+}
+
+function masterListen() {
+  const c = listenDeck[listenIndex];
+  if (!c) return;
+  if (listenMastered[c.danish]) {
+    delete listenMastered[c.danish];        // un-master (in ⭐ review mode)
+  } else {
+    listenMastered[c.danish] = true;
+    delete listenRatings[c.danish];
+    save('listenRatings', listenRatings);
+  }
+  save('listenMastered', listenMastered);
+  // remove from the current deck and move on
+  listenDeck.splice(listenIndex, 1);
+  if (listenIndex >= listenDeck.length) listenIndex = 0;
+  stopAudio();
+  renderListenCard(listenDeck.length > 0);
 }
 
 function listenSkip() { listenAdvance(); }
