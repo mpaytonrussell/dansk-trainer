@@ -1198,6 +1198,8 @@ async function loadAudioIndex() {
     if (!res.ok) throw new Error('no index');
     audioIndex = await res.json();
     setAudioBadge(true);
+    // Warm the packs immediately so playback never waits on the network mid-tap
+    audioIndex.packs.forEach(p => getPack(p).catch(()=>{}));
   } catch(e) {
     audioIndex = null;
     setAudioBadge(false);
@@ -1213,9 +1215,23 @@ function setAudioBadge(neural) {
 
 function getPack(name) {
   if (!packCache[name]) {
-    packCache[name] = fetch(name).then(r => { if (!r.ok) throw new Error('pack 404'); return r.json(); });
+    packCache[name] = fetch(name)
+      .then(r => { if (!r.ok) throw new Error('pack 404'); return r.json(); })
+      .catch(e => { delete packCache[name]; throw e; });   // never cache a failure
   }
   return packCache[name];
+}
+
+// One persistent <audio> element: once unlocked by the first tap on iOS,
+// it stays unlocked for all future plays (including auto-advance).
+let audioEl = null;
+function getAudioEl() {
+  if (!audioEl) {
+    audioEl = new Audio();
+    audioEl.setAttribute('playsinline','');
+    audioEl.preload = 'auto';
+  }
+  return audioEl;
 }
 
 function b64toUrl(b64) {
@@ -1257,7 +1273,9 @@ async function playDanish(text, opts = {}) {
           const pack = await getPack(audioIndex.packs[entry[v]]);
           blobCache[key] = b64toUrl(pack[key]);
         }
-        const a = new Audio(blobCache[key]);
+        const a = getAudioEl();
+        a.onplay = a.onended = a.onerror = null;
+        a.src = blobCache[key];
         a.playbackRate = rate;
         currentAudio = a;
         a.onplay  = () => { audioPlaying = true; if (opts.onstart) opts.onstart(); };
