@@ -319,6 +319,111 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
   box-shadow:0 1px 3px rgba(0,0,0,0.4);
 }
 .auto-track.on .auto-thumb { transform:translateX(16px); }
+
+/* ── v2.0: TABS ── */
+.tab-bar { display:flex; gap:8px; justify-content:center; align-items:center; margin-bottom:22px; flex-wrap:wrap; }
+.tab-btn {
+  font-family:'DM Mono',monospace; font-size:0.74rem; letter-spacing:0.08em; text-transform:uppercase;
+  padding:9px 18px; border:1.5px solid var(--border); background:var(--surface); color:var(--muted);
+  border-radius:2px; cursor:pointer; transition:all .15s;
+}
+.tab-btn:hover { border-color:var(--accent); color:var(--accent); }
+.tab-btn.active { background:var(--navy); border-color:var(--navy); color:var(--text); }
+.gear-btn { border:1.5px solid var(--border); background:var(--surface); color:var(--muted); border-radius:2px; padding:8px 11px; cursor:pointer; font-size:0.85rem; }
+.gear-btn:hover { border-color:var(--gold); color:var(--gold); }
+.view { display:none; }
+.view.active { display:block; }
+.audio-src-badge { text-align:center; font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:0.06em; color:var(--muted); margin:-8px 0 14px; }
+.audio-src-badge.neural { color:#4caf70; }
+
+/* ── v2.0: LISTEN ── */
+.listen-card {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:6px;
+  padding:34px 24px 28px; text-align:center; margin-bottom:16px; min-height:300px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+}
+.listen-play {
+  width:96px; height:96px; border-radius:50%; border:2px solid var(--accent);
+  background:rgba(224,112,64,0.08); color:var(--accent); font-size:2.2rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:all .15s;
+}
+.listen-play:hover { background:rgba(224,112,64,0.18); transform:scale(1.04); }
+.listen-play.playing { animation:pulse 1.1s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(224,112,64,0.35);} 50%{box-shadow:0 0 0 14px rgba(224,112,64,0);} }
+.listen-sub { font-family:'DM Mono',monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+.listen-mini-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.listen-mini {
+  font-family:'DM Mono',monospace; font-size:0.66rem; letter-spacing:0.06em; padding:6px 13px;
+  border:1.5px solid var(--border); background:transparent; color:var(--muted); border-radius:2px; cursor:pointer;
+}
+.listen-mini:hover { border-color:var(--accent); color:var(--accent); }
+.listen-mini.active { border-color:var(--accent); color:var(--accent); }
+.listen-da { font-size:1.45rem; font-weight:400; line-height:1.4; }
+.listen-en { font-size:1.02rem; font-style:italic; color:#a0b4d0; line-height:1.4; }
+.listen-hidden-hint { color:var(--muted); font-style:italic; font-size:1.0rem; }
+
+/* ── v2.0: SAMTALE ── */
+.scen-row { display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-bottom:14px; }
+.scen-chip {
+  font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.05em; padding:6px 12px;
+  border:1.5px solid var(--border); background:var(--surface); color:var(--muted); border-radius:14px; cursor:pointer; transition:all .15s;
+}
+.scen-chip:hover { border-color:var(--accent); color:var(--accent); }
+.scen-chip.active { border-color:var(--forest); background:var(--forest); color:var(--text); }
+.chat-box {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:6px;
+  height:52vh; min-height:340px; overflow-y:auto; padding:16px 14px; margin-bottom:10px;
+  display:flex; flex-direction:column; gap:12px; scroll-behavior:smooth;
+}
+.bubble { max-width:86%; padding:11px 14px; border-radius:10px; line-height:1.45; font-size:1.02rem; position:relative; }
+.bubble.claude { align-self:flex-start; background:#20293a; border:1px solid #2c3a55; border-bottom-left-radius:3px; }
+.bubble.user   { align-self:flex-end; background:var(--forest); border:1px solid #2a5c3d; border-bottom-right-radius:3px; }
+.bubble-tools { display:flex; gap:8px; margin-top:8px; }
+.bubble-tool {
+  font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.05em; padding:3px 9px;
+  border:1px solid #3a4a68; background:transparent; color:#8ba0c4; border-radius:3px; cursor:pointer;
+}
+.bubble-tool:hover { border-color:var(--accent); color:var(--accent); }
+.bubble-en { margin-top:8px; font-style:italic; font-size:0.9rem; color:#a0b4d0; border-top:1px dashed #3a4a68; padding-top:7px; }
+.correction {
+  align-self:flex-end; max-width:86%; background:#231a08; border:1px solid #4a3a15; border-radius:8px;
+  padding:9px 13px; font-size:0.88rem; line-height:1.45;
+}
+.correction .c-hd { font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.07em; text-transform:uppercase; color:var(--gold); margin-bottom:4px; }
+.correction .c-better { color:#e8dcb8; }
+.correction .c-note { color:var(--muted); font-size:0.8rem; margin-top:4px; font-style:italic; }
+.sugg-row { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+.sugg-chip {
+  text-align:left; font-size:0.92rem; padding:8px 13px; border:1.5px dashed var(--border);
+  background:transparent; color:#b8c4d8; border-radius:8px; cursor:pointer; font-family:'Fraunces',Georgia,serif;
+}
+.sugg-chip:hover { border-color:var(--accent); color:var(--accent); }
+.chat-input-row { display:flex; gap:8px; }
+.chat-input-row textarea {
+  flex:1; background:var(--surface); border:1.5px solid var(--border); border-radius:4px;
+  color:var(--text); font-family:'Fraunces',Georgia,serif; font-size:1.0rem; padding:10px 12px;
+  resize:none; height:64px; outline:none;
+}
+.chat-input-row textarea:focus { border-color:var(--navy); }
+.chat-side { display:flex; flex-direction:column; gap:8px; }
+.chat-typing { align-self:flex-start; color:var(--muted); font-style:italic; font-size:0.9rem; padding:4px 8px; }
+.chat-hint { text-align:center; font-family:'DM Mono',monospace; font-size:0.62rem; color:var(--muted); letter-spacing:0.05em; margin-top:8px; }
+
+/* ── v2.0: SETTINGS MODAL ── */
+.modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:50; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-bg.open { display:flex; }
+.modal {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:8px;
+  max-width:480px; width:100%; padding:26px 24px;
+}
+.modal h2 { font-weight:400; font-size:1.3rem; margin-bottom:6px; }
+.modal p { font-size:0.9rem; color:var(--muted); line-height:1.5; margin-bottom:14px; }
+.modal input {
+  width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:4px;
+  color:var(--text); font-family:'DM Mono',monospace; font-size:0.85rem; padding:10px 12px; outline:none; margin-bottom:14px;
+}
+.modal input:focus { border-color:var(--navy); }
+.modal .m-row { display:flex; gap:10px; justify-content:flex-end; }
 </style>
 </head>
 <body>
@@ -326,9 +431,18 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
 
 <header>
   <h1><span>Dansk</span> Trainer</h1>
-  <div class="subtitle">84 words · 93 sentences · 52 key words</div>
+  <div class="subtitle">v2.0 · 84 words · 93 sentences · 52 key words</div>
 </header>
 
+<!-- v2.0 Tabs -->
+<nav class="tab-bar">
+  <button class="tab-btn active" id="tabCards"   onclick="setView('cards')">📇 Kort</button>
+  <button class="tab-btn" id="tabListen"  onclick="setView('listen')">🎧 Lyt</button>
+  <button class="tab-btn" id="tabSamtale" onclick="setView('samtale')">💬 Samtale</button>
+  <button class="gear-btn" onclick="openSettings()" title="Settings">⚙</button>
+</nav>
+
+<div class="view active" id="viewCards">
 
 <!-- Flip direction toggle -->
 <div class="flip-toggle">
@@ -486,6 +600,96 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
     <span class="arrow" id="panelDunnoArrow">▼</span>
   </div>
   <div class="panel-body" id="panelDunno"></div>
+</div>
+
+</div><!-- /viewCards -->
+
+<!-- ═══ v2.0 LYT (LISTENING) VIEW ═══ -->
+<div class="view" id="viewListen">
+  <div class="audio-src-badge" id="audioSrcBadge">checking audio…</div>
+
+  <div class="mode-bar">
+    <button class="mode-btn active" onclick="setListenMode('all',this)">All sentences</button>
+    <button class="mode-btn" onclick="setListenMode('struggle',this)">Struggling</button>
+    <button class="mode-btn fire-mode" onclick="setListenMode('hot',this)">🔥 Missed (<span id="listenHotCount">0</span>)</button>
+  </div>
+
+  <div class="progress-section">
+    <div class="prog-top">
+      <span id="listenCounter">Sentence 1 of 0</span>
+      <span id="listenStats">✓ 0 &nbsp;~ 0 &nbsp;✗ 0</span>
+    </div>
+  </div>
+
+  <div class="listen-card" id="listenCard">
+    <div class="listen-sub" id="listenStage">Listen — what do you hear?</div>
+    <button class="listen-play" id="listenPlayBtn" onclick="listenPlay()">▶</button>
+    <div class="listen-mini-row">
+      <button class="listen-mini" onclick="listenPlay(0.7)">🐢 Slow</button>
+      <button class="listen-mini" id="voiceToggleBtn" onclick="cycleVoice()">Voice: mix</button>
+    </div>
+    <div id="listenReveal" style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+      <div class="listen-hidden-hint" id="listenHint">Tap play, listen as many times as you need…</div>
+      <div class="listen-da" id="listenDa" style="display:none"></div>
+      <div class="listen-en" id="listenEn" style="display:none"></div>
+    </div>
+    <div class="listen-mini-row" id="listenRevealBtns">
+      <button class="listen-mini" id="revealDaBtn" onclick="revealDanish()">Show Danish</button>
+      <button class="listen-mini" id="revealEnBtn" onclick="revealEnglish()" style="display:none">Show English</button>
+    </div>
+  </div>
+
+  <div class="rating-area" id="listenRating" style="display:none">
+    <button class="rate-btn r-dunno"  onclick="rateListen('dunno')"><span class="em">😕</span><span class="lb">Missed it</span></button>
+    <button class="rate-btn r-unsure" onclick="rateListen('unsure')"><span class="em">😐</span><span class="lb">Partly</span></button>
+    <button class="rate-btn r-know"   onclick="rateListen('know')"><span class="em">😊</span><span class="lb">Understood!</span></button>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn" onclick="listenSkip()">Skip →</button>
+    <button class="ctrl-btn" onclick="listenShuffle()">↺ Shuffle</button>
+    <button class="ctrl-btn" onclick="resetListenProgress()">Reset scores</button>
+  </div>
+</div><!-- /viewListen -->
+
+<!-- ═══ v2.0 SAMTALE (CONVERSATION) VIEW ═══ -->
+<div class="view" id="viewSamtale">
+  <div class="scen-row" id="scenRow">
+    <button class="scen-chip" onclick="pickScenario('I toget på vej til arbejde — small talk med en anden pendler', this)">🚆 I toget</button>
+    <button class="scen-chip" onclick="pickScenario('På arbejdet — en kollega spørger om din weekend og dine opgaver', this)">💼 På arbejde</button>
+    <button class="scen-chip" onclick="pickScenario('Ved skolen/institutionen — snak med en anden forælder ved afhentning', this)">🏫 Skoleafhentning</button>
+    <button class="scen-chip" onclick="pickScenario('Familiemiddag med svigerfamilien — hyggelig snak om hverdagen', this)">🍽 Familiemiddag</button>
+    <button class="scen-chip" onclick="pickScenario('Sport og fritid — snak om fodbold, golf eller mountainbike', this)">⚽ Sport & fritid</button>
+    <button class="scen-chip" onclick="pickScenario('Modultest-øvelse: diskutér et samfundsemne (arbejdsliv, integration, teknologi) og giv din mening med argumenter', this)">🎓 Modultest-emner</button>
+  </div>
+
+  <div class="chat-box" id="chatBox">
+    <div class="bubble claude">Hej! 🇩🇰 Vælg et emne ovenfor, så starter vi en samtale på dansk. Du skriver — ingen talegenkendelse, intet pres. Jeg retter kun, når det virkelig hjælper.</div>
+  </div>
+
+  <div class="sugg-row" id="suggRow"></div>
+
+  <div class="chat-input-row">
+    <textarea id="chatInput" placeholder="Skriv på dansk… (det er okay at lave fejl!)"></textarea>
+    <div class="chat-side">
+      <button class="ctrl-btn primary" onclick="sendChat()" style="height:38px">Send</button>
+      <button class="ctrl-btn" onclick="getHelp()" title="Get reply ideas" style="height:38px">💡 Hjælp</button>
+    </div>
+  </div>
+  <div class="chat-hint">Enter = send · 💡 = stuck? get reply ideas at your level · <span style="cursor:pointer;text-decoration:underline" onclick="newChat()">ny samtale</span></div>
+</div><!-- /viewSamtale -->
+
+<!-- ═══ v2.0 SETTINGS MODAL ═══ -->
+<div class="modal-bg" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <h2>⚙ Settings</h2>
+    <p><strong>Anthropic API key</strong> — needed for 💬 Samtale and AI Generate. The key is stored only in this browser (localStorage) and calls go directly from your device to Anthropic. Create one at <span style="color:#a0b4d0">console.anthropic.com</span> → API Keys.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-…" autocomplete="off">
+    <div class="m-row">
+      <button class="ctrl-btn" onclick="closeSettings()">Close</button>
+      <button class="ctrl-btn primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
 </div>
 
 </div><!-- /app -->
@@ -724,7 +928,7 @@ function renderCard() {
   document.getElementById('audioBtn').classList.remove('playing');
   if (autoPlay) {
     const text = getDanishText(deck[currentIndex]);
-    if (text) setTimeout(() => speakText(text), 180);
+    if (text) setTimeout(() => playDanish(text), 180);
   }
 }
 
@@ -948,11 +1152,7 @@ Return ONLY a JSON array, no markdown. Each object:
 Mix: ~4 vocab verbs/words, ~5 short natural sentences (5-10 words), ~3 key connector words.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
-    });
-    const data = await res.json();
+    const data = await apiCall({max_tokens:1200, messages:[{role:'user',content:prompt}]});
     const text = data.content.map(c=>c.text||'').join('');
     const cards = JSON.parse(text.replace(/```json|```/g,'').trim());
     deck = shuffle(cards);
@@ -970,12 +1170,105 @@ Mix: ~4 vocab verbs/words, ~5 short natural sentences (5-10 words), ~3 key conne
 document.getElementById('aiTopic').addEventListener('keydown', e => { if(e.key==='Enter') generateAI(); });
 
 // ════════════════════════════════════════════
-// AUDIO — Web Speech API (da-DK)
+// AUDIO v2 — Neural MP3 packs, Web Speech fallback
 // ════════════════════════════════════════════
 const synth      = window.speechSynthesis;
 let audioSpeed   = 1.0;
 let autoPlay     = false;
 let audioPlaying = false;
+
+// --- neural audio pack engine ---
+let audioIndex   = null;              // {packs:[...], map:{hash:{c:packIdx, j:packIdx}}}
+const packCache  = {};                // packName -> Promise<object>
+const blobCache  = {};                // "hash_v" -> object URL
+let currentAudio = null;
+let voicePref    = load('voicePref', 'mix');   // 'c' | 'j' | 'mix'
+let mixFlip      = false;
+
+function fnv1a(str) {
+  const bytes = new TextEncoder().encode(str.normalize('NFC'));
+  let h = 0x811c9dc5;
+  for (const b of bytes) { h ^= b; h = Math.imul(h, 0x01000193) >>> 0; }
+  return ('0000000' + h.toString(16)).slice(-8);
+}
+
+async function loadAudioIndex() {
+  try {
+    const res = await fetch('audio_index.json', {cache:'no-cache'});
+    if (!res.ok) throw new Error('no index');
+    audioIndex = await res.json();
+    setAudioBadge(true);
+  } catch(e) {
+    audioIndex = null;
+    setAudioBadge(false);
+  }
+}
+
+function setAudioBadge(neural) {
+  const el = document.getElementById('audioSrcBadge');
+  if (!el) return;
+  el.textContent = neural ? '● neural danish voices (Christel & Jeppe)' : '⚠ neural audio not found — using device voice';
+  el.classList.toggle('neural', neural);
+}
+
+function getPack(name) {
+  if (!packCache[name]) {
+    packCache[name] = fetch(name).then(r => { if (!r.ok) throw new Error('pack 404'); return r.json(); });
+  }
+  return packCache[name];
+}
+
+function b64toUrl(b64) {
+  const bin = atob(b64);
+  const u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return URL.createObjectURL(new Blob([u8], {type:'audio/mpeg'}));
+}
+
+function chooseVoice(entry) {
+  const has = Object.keys(entry);                    // e.g. ['c','j'] or ['c']
+  if (voicePref !== 'mix' && has.includes(voicePref)) return voicePref;
+  if (voicePref === 'mix' && has.length > 1) { mixFlip = !mixFlip; return mixFlip ? 'j' : 'c'; }
+  return has[0];
+}
+
+function stopAudio() {
+  synth.cancel();
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  audioPlaying = false;
+  document.querySelectorAll('.playing').forEach(el => el.classList.remove('playing'));
+}
+
+// Plays neural MP3 if available, else falls back to Web Speech.
+// opts: { rate, onstart, onend }
+async function playDanish(text, opts = {}) {
+  if (!text) return;
+  stopAudio();
+  const rate = opts.rate || audioSpeed;
+  const done = () => { audioPlaying = false; if (opts.onend) opts.onend(); };
+
+  if (audioIndex && audioIndex.map) {
+    const entry = audioIndex.map[fnv1a(text)];
+    if (entry) {
+      try {
+        const v    = chooseVoice(entry);
+        const key  = fnv1a(text) + '_' + v;
+        if (!blobCache[key]) {
+          const pack = await getPack(audioIndex.packs[entry[v]]);
+          blobCache[key] = b64toUrl(pack[key]);
+        }
+        const a = new Audio(blobCache[key]);
+        a.playbackRate = rate;
+        currentAudio = a;
+        a.onplay  = () => { audioPlaying = true; if (opts.onstart) opts.onstart(); };
+        a.onended = a.onerror = done;
+        await a.play();
+        return;
+      } catch(e) { console.warn('neural audio failed, falling back', e); }
+    }
+  }
+  speakText(text, rate, opts);
+}
 
 function getDanishText(card) {
   if (!card) return null;
@@ -992,26 +1285,19 @@ function pickDanishVoice() {
       || null;
 }
 
-function speakText(text) {
+function speakText(text, rate, opts = {}) {
   if (!text) return;
   synth.cancel();
   audioPlaying = false;
-  document.getElementById('audioBtn').classList.remove('playing');
 
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'da-DK';
-  u.rate = audioSpeed;
+  u.rate = rate || audioSpeed;
   const voice = pickDanishVoice();
   if (voice) u.voice = voice;
 
-  u.onstart = () => {
-    audioPlaying = true;
-    document.getElementById('audioBtn').classList.add('playing');
-  };
-  u.onend = u.onerror = () => {
-    audioPlaying = false;
-    document.getElementById('audioBtn').classList.remove('playing');
-  };
+  u.onstart = () => { audioPlaying = true; if (opts.onstart) opts.onstart(); };
+  u.onend = u.onerror = () => { audioPlaying = false; if (opts.onend) opts.onend(); };
   synth.speak(u);
 }
 
@@ -1022,13 +1308,12 @@ if (synth.onvoiceschanged !== undefined) {
 
 function speakCurrent(e) {
   if (e) e.stopPropagation();
-  if (audioPlaying) {
-    synth.cancel();
-    audioPlaying = false;
-    document.getElementById('audioBtn').classList.remove('playing');
-    return;
-  }
-  if (currentIndex < deck.length) speakText(getDanishText(deck[currentIndex]));
+  if (audioPlaying) { stopAudio(); return; }
+  const btn = document.getElementById('audioBtn');
+  if (currentIndex < deck.length) playDanish(getDanishText(deck[currentIndex]), {
+    onstart: () => btn.classList.add('playing'),
+    onend:   () => btn.classList.remove('playing')
+  });
 }
 
 function setSpeed(rate, btn) {
@@ -1083,9 +1368,328 @@ function renderNotesPanel() {
 }
 
 // ════════════════════════════════════════════
+// v2.0 — VIEWS
+// ════════════════════════════════════════════
+function setView(v) {
+  stopAudio();
+  ['cards','listen','samtale'].forEach(x => {
+    document.getElementById('view'+x[0].toUpperCase()+x.slice(1)).classList.toggle('active', x===v);
+    document.getElementById('tab'+x[0].toUpperCase()+x.slice(1)).classList.toggle('active', x===v);
+  });
+  if (v==='listen' && !listenDeck.length) initListen();
+}
+
+// ════════════════════════════════════════════
+// v2.0 — API (key stored locally, direct to Anthropic)
+// ════════════════════════════════════════════
+let apiKey = load('apiKey','');
+
+async function apiCall(body) {
+  if (!apiKey) { openSettings(); throw new Error('API key needed'); }
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify({model:'claude-sonnet-4-6', ...body})
+  });
+  if (!res.ok) {
+    if (res.status===401) { openSettings(); throw new Error('API key invalid'); }
+    throw new Error('API error '+res.status);
+  }
+  return res.json();
+}
+
+function openSettings()  { document.getElementById('apiKeyInput').value = apiKey; document.getElementById('settingsModal').classList.add('open'); }
+function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
+function saveSettings()  {
+  apiKey = document.getElementById('apiKeyInput').value.trim();
+  save('apiKey', apiKey);
+  closeSettings();
+}
+
+// ════════════════════════════════════════════
+// v2.0 — LYT (LISTENING MODE)
+// ════════════════════════════════════════════
+let listenDeck = [], listenIndex = 0, listenModeName = 'all';
+let listenRatings = load('listenRatings', {});
+let listenSession = {know:0, unsure:0, dunno:0};
+let listenStage = 0; // 0 hidden, 1 danish shown, 2 english shown
+
+function buildListenPool() {
+  const seen = {}, pool = [];
+  const push = (da, en) => {
+    if (!da || seen[da]) return; seen[da] = 1;
+    pool.push({danish:da, english:en||''});
+  };
+  RAW_SENTENCES.forEach(s => push(s.danish, s.english));
+  ENRICHED_VOCAB.forEach(v => push(v.dkSentence, v.enSentence));
+  RAW_KEYWORDS.forEach(k => push(k.sentence_da, k.sentence_en));
+  return pool;
+}
+
+function initListen() {
+  setListenModeInternal(listenModeName);
+}
+
+function setListenMode(m, btn) {
+  document.querySelectorAll('#viewListen .mode-btn').forEach(b=>b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  setListenModeInternal(m);
+}
+
+function setListenModeInternal(m) {
+  listenModeName = m;
+  let pool = buildListenPool();
+  if (m==='struggle') pool = pool.filter(s => ['unsure','dunno'].includes(listenRatings[s.danish]));
+  if (m==='hot')      pool = pool.filter(s => listenRatings[s.danish]==='dunno');
+  listenDeck = shuffle(pool);
+  listenIndex = 0;
+  listenSession = {know:0, unsure:0, dunno:0};
+  renderListenCard(false);
+}
+
+function renderListenCard(autoplay) {
+  listenStage = 0;
+  updateListenUI();
+  const c = listenDeck[listenIndex];
+  document.getElementById('listenCounter').textContent =
+    listenDeck.length ? `Sentence ${listenIndex+1} of ${listenDeck.length}` : 'No sentences in this mode yet';
+  document.getElementById('listenStats').innerHTML =
+    `✓ ${listenSession.know} &nbsp;~ ${listenSession.unsure} &nbsp;✗ ${listenSession.dunno}`;
+  document.getElementById('listenHotCount').textContent =
+    Object.values(listenRatings).filter(v=>v==='dunno').length;
+  if (c && autoplay) listenPlay();
+}
+
+function updateListenUI() {
+  const c = listenDeck[listenIndex];
+  const has = !!c;
+  document.getElementById('listenHint').style.display = (has && listenStage===0) ? '' : 'none';
+  document.getElementById('listenDa').style.display   = (has && listenStage>=1) ? '' : 'none';
+  document.getElementById('listenEn').style.display   = (has && listenStage>=2) ? '' : 'none';
+  if (has) {
+    document.getElementById('listenDa').textContent = c.danish;
+    document.getElementById('listenEn').textContent = c.english;
+  }
+  document.getElementById('revealDaBtn').style.display = (has && listenStage===0) ? '' : 'none';
+  document.getElementById('revealEnBtn').style.display = (has && listenStage===1) ? '' : 'none';
+  document.getElementById('listenRating').style.display = (has && listenStage>=1) ? '' : 'none';
+  document.getElementById('listenStage').textContent =
+    !has ? 'Nothing here — go rate some sentences first' :
+    listenStage===0 ? 'Listen — what do you hear?' :
+    listenStage===1 ? 'Did you hear it right? Now — do you understand it?' :
+    'How did you do?';
+}
+
+function listenPlay(rate) {
+  const c = listenDeck[listenIndex];
+  if (!c) return;
+  const btn = document.getElementById('listenPlayBtn');
+  playDanish(c.danish, {
+    rate: rate || 1.0,
+    onstart: () => btn.classList.add('playing'),
+    onend:   () => btn.classList.remove('playing')
+  });
+}
+
+function revealDanish()  { listenStage = 1; updateListenUI(); }
+function revealEnglish() { listenStage = 2; updateListenUI(); }
+
+function rateListen(r) {
+  const c = listenDeck[listenIndex];
+  if (!c) return;
+  listenRatings[c.danish] = r;
+  save('listenRatings', listenRatings);
+  listenSession[r]++;
+  listenAdvance();
+}
+
+function listenSkip() { listenAdvance(); }
+
+function listenAdvance() {
+  stopAudio();
+  if (listenIndex < listenDeck.length-1) {
+    listenIndex++;
+    renderListenCard(true);   // auto-play next — triggered by the tap, so iOS allows it
+  } else {
+    listenIndex = 0;
+    listenDeck = shuffle(listenDeck);
+    renderListenCard(false);
+    document.getElementById('listenStage').textContent = 'Round done! 🇩🇰 Tap play to go again';
+  }
+}
+
+function listenShuffle() { listenDeck = shuffle(listenDeck); listenIndex=0; renderListenCard(false); }
+function resetListenProgress() {
+  if (!confirm('Reset all listening scores?')) return;
+  listenRatings = {}; save('listenRatings', listenRatings);
+  setListenModeInternal(listenModeName);
+}
+
+function cycleVoice() {
+  voicePref = voicePref==='mix' ? 'c' : voicePref==='c' ? 'j' : 'mix';
+  save('voicePref', voicePref);
+  document.getElementById('voiceToggleBtn').textContent =
+    'Voice: ' + (voicePref==='c' ? '♀ Christel' : voicePref==='j' ? '♂ Jeppe' : 'mix');
+}
+
+// ════════════════════════════════════════════
+// v2.0 — SAMTALE (typed conversation, no speech recognition)
+// ════════════════════════════════════════════
+let samtale = load('samtale', {scenario:null, messages:[]});
+
+const SAMTALE_SYSTEM = (scenario) => `You are Freja, a warm, patient Danish conversation partner. Scenario: ${scenario}.
+
+The learner: American, lived in Denmark 4 years, Danish wife, two young bilingual kids, works in finance (director at Arla Foods in Viby), commutes by train from the Aarhus area, plays football and golf, mountain bikes and kayaks. Level: strong A2/low B1 (Danskuddannelse 3, modul 3–4). Understands more than he can produce.
+
+RULES:
+1. Reply ONLY in Danish. 1–3 short natural sentences (spoken style, not textbook). Use vocabulary around his level; stretch him slightly, never overwhelm.
+2. Always end with a natural follow-up question to keep the conversation alive.
+3. Stay in the scenario, reference his real life naturally.
+4. If the scenario is modultest practice, gently push for opinions and reasons (fordi, derfor, på den ene side...) like an examiner would, but stay friendly.
+5. Corrections: only when his message has a genuine error worth learning from (word order, verb tense, wrong word). Ignore typos and missing punctuation. Focus especially on: infinitive vs nutid (-r), datid/perfektum, and subordinate clause word order.
+6. Never switch to English in reply_da.
+
+Respond with ONLY a raw JSON object, no markdown fences:
+{"reply_da":"...","reply_en":"English translation of reply_da","correction":null or {"improved":"his sentence, corrected, in Danish","note":"one short English line explaining the pattern"}}`;
+
+function pickScenario(scenario, chip) {
+  document.querySelectorAll('.scen-chip').forEach(c=>c.classList.remove('active'));
+  if (chip) chip.classList.add('active');
+  samtale = {scenario, messages:[]};
+  save('samtale', samtale);
+  document.getElementById('suggRow').innerHTML = '';
+  renderChat();
+  claudeTurn();  // Freja opens the conversation
+}
+
+function newChat() {
+  samtale = {scenario:null, messages:[]};
+  save('samtale', samtale);
+  document.querySelectorAll('.scen-chip').forEach(c=>c.classList.remove('active'));
+  document.getElementById('suggRow').innerHTML = '';
+  renderChat();
+}
+
+function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+function renderChat() {
+  const box = document.getElementById('chatBox');
+  if (!samtale.scenario) {
+    box.innerHTML = '<div class="bubble claude">Hej! 🇩🇰 Vælg et emne ovenfor, så starter vi en samtale på dansk. Du skriver — ingen talegenkendelse, intet pres. Jeg retter kun, når det virkelig hjælper.</div>';
+    return;
+  }
+  box.innerHTML = samtale.messages.map((m,i) => {
+    if (m.role==='user') return `<div class="bubble user">${esc(m.da)}</div>`;
+    let html = '';
+    if (m.correction) html += `<div class="correction"><div class="c-hd">✏️ a Dane would say</div><div class="c-better">${esc(m.correction.improved)}</div><div class="c-note">${esc(m.correction.note)}</div></div>`;
+    html += `<div class="bubble claude">${esc(m.da)}
+      <div class="bubble-tools">
+        <button class="bubble-tool" onclick="playChatMsg(${i}, this)">🔊 lyt</button>
+        <button class="bubble-tool" onclick="toggleEn(${i})">EN</button>
+      </div>
+      <div class="bubble-en" id="en${i}" style="display:none">${esc(m.en)}</div></div>`;
+    return html;
+  }).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+function toggleEn(i) {
+  const el = document.getElementById('en'+i);
+  el.style.display = el.style.display==='none' ? '' : 'none';
+}
+
+function playChatMsg(i, btn) {
+  playDanish(samtale.messages[i].da, {
+    onstart: ()=>btn.classList.add('playing'),
+    onend:   ()=>btn.classList.remove('playing')
+  });
+}
+
+function chatTyping(on) {
+  let t = document.getElementById('chatTyping');
+  if (on && !t) {
+    t = document.createElement('div');
+    t.id='chatTyping'; t.className='chat-typing'; t.textContent='Freja skriver…';
+    document.getElementById('chatBox').appendChild(t);
+    document.getElementById('chatBox').scrollTop = 1e9;
+  } else if (!on && t) t.remove();
+}
+
+function chatHistory() {
+  // last 16 turns as plain alternating messages
+  return samtale.messages.slice(-16).map(m => ({role: m.role==='user'?'user':'assistant', content: m.da}));
+}
+
+async function claudeTurn() {
+  chatTyping(true);
+  try {
+    const hist = chatHistory();
+    const messages = hist.length ? hist : [{role:'user', content:'(Start samtalen — sig hej og stil det første spørgsmål.)'}];
+    const data = await apiCall({max_tokens:600, system:SAMTALE_SYSTEM(samtale.scenario), messages});
+    const text = data.content.map(c=>c.text||'').join('');
+    const j = JSON.parse(text.replace(/```json|```/g,'').trim());
+    samtale.messages.push({role:'claude', da:j.reply_da, en:j.reply_en, correction:j.correction||null});
+    save('samtale', samtale);
+    renderChat();
+  } catch(e) {
+    console.error(e);
+    if (String(e).includes('API key')) return; // settings modal already open
+    chatTyping(false);
+    const box = document.getElementById('chatBox');
+    box.insertAdjacentHTML('beforeend','<div class="chat-typing">⚠ Kunne ikke få svar — prøv igen.</div>');
+  } finally { chatTyping(false); }
+}
+
+function sendChat() {
+  const ta = document.getElementById('chatInput');
+  const txt = ta.value.trim();
+  if (!txt) return;
+  if (!samtale.scenario) { pickScenario('Fri samtale om hverdagen', null); }
+  ta.value = '';
+  document.getElementById('suggRow').innerHTML = '';
+  samtale.messages.push({role:'user', da:txt});
+  save('samtale', samtale);
+  renderChat();
+  claudeTurn();
+}
+
+async function getHelp() {
+  if (!samtale.scenario) return;
+  const row = document.getElementById('suggRow');
+  row.innerHTML = '<div class="chat-typing">💡 Finder idéer…</div>';
+  try {
+    const prompt = `Conversation so far (Danish):\n${samtale.messages.slice(-6).map(m=>(m.role==='user'?'LEARNER: ':'FREJA: ')+m.da).join('\n')}\n\nGive the LEARNER 3 possible next replies in Danish at strong-A2/low-B1 level — short, natural, different in direction (e.g. answer + ask back / share opinion / ask for clarification). Return ONLY a raw JSON array of 3 strings.`;
+    const data = await apiCall({max_tokens:400, messages:[{role:'user', content:prompt}]});
+    const text = data.content.map(c=>c.text||'').join('');
+    const arr = JSON.parse(text.replace(/```json|```/g,'').trim());
+    row.innerHTML = arr.map(s=>`<button class="sugg-chip" onclick="useSugg(this)">${esc(s)}</button>`).join('');
+  } catch(e) { row.innerHTML=''; console.error(e); }
+}
+
+function useSugg(btn) {
+  const ta = document.getElementById('chatInput');
+  ta.value = btn.textContent;
+  ta.focus();
+  document.getElementById('suggRow').innerHTML = '';
+}
+
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+
+// ════════════════════════════════════════════
 // START
 // ════════════════════════════════════════════
 initApp();
+loadAudioIndex();
+document.getElementById('voiceToggleBtn').textContent =
+  'Voice: ' + (voicePref==='c' ? '♀ Christel' : voicePref==='j' ? '♂ Jeppe' : 'mix');
+if (samtale.scenario) renderChat();
 </script>
 </body>
 </html>
