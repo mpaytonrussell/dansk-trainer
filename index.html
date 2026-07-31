@@ -424,6 +424,32 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
 }
 .modal input:focus { border-color:var(--navy); }
 .modal .m-row { display:flex; gap:10px; justify-content:flex-end; }
+
+/* ── v2.1: MODUL 4 SPRINT ── */
+.sprint-group-label { font-family:'DM Mono',monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin:16px 0 8px; }
+.sprint-group-label:first-child { margin-top:0; }
+.sprint-item { background:var(--surface); border:1.5px solid var(--border); border-radius:4px; padding:12px 14px; margin-bottom:8px; cursor:pointer; transition:border-color .15s; }
+.sprint-item:hover { border-color:var(--accent); }
+.sprint-head { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.sprint-word { font-weight:700; font-size:0.95rem; }
+.sprint-vs { color:var(--muted); font-family:'DM Mono',monospace; font-size:0.7rem; }
+.sprint-en { color:#a0b4d0; font-style:italic; font-size:0.85rem; }
+.sprint-detail { display:none; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); font-size:0.85rem; line-height:1.6; color:var(--text); opacity:0.9; }
+.sprint-detail.open { display:block; }
+.sprint-detail .da { font-style:italic; }
+.sprint-detail .en { color:#a0b4d0; margin-top:2px; }
+.sprint-count { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); text-align:right; margin-bottom:10px; }
+.quiz-opt { display:block; width:100%; text-align:left; padding:11px 14px; margin-bottom:8px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); border-radius:4px; cursor:pointer; font-family:'Fraunces',Georgia,serif; font-size:0.98rem; transition:all .15s; }
+.quiz-opt:hover:not(:disabled) { border-color:var(--accent); }
+.quiz-opt:disabled { cursor:default; }
+.quiz-opt.correct { border-color:var(--know); color:var(--know); }
+.quiz-opt.wrong { border-color:var(--dunno); color:var(--dunno); }
+.quiz-sentence { font-size:1.1rem; line-height:1.5; margin-bottom:16px; }
+.quiz-en-toggle { font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.06em; color:var(--muted); text-transform:uppercase; cursor:pointer; text-decoration:underline; }
+.quiz-en-line { font-family:'DM Mono',monospace; font-size:0.75rem; color:#a0b4d0; font-style:italic; margin-top:10px; display:none; }
+.quiz-en-line.open { display:block; }
+.quiz-done { text-align:center; padding:30px 10px; }
+.quiz-done .num { font-size:2rem; font-weight:700; color:var(--accent); }
 </style>
 </head>
 <body>
@@ -431,7 +457,7 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
 
 <header>
   <h1><span>Dansk</span> Trainer</h1>
-  <div class="subtitle">v2.1 · 140 words · 128 sentences · 80 key words</div>
+  <div class="subtitle">v2.2 · 140 words · 128 sentences · 80 key words · Modul 4 sprint</div>
 </header>
 
 <!-- v2.0 Tabs -->
@@ -439,6 +465,7 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
   <button class="tab-btn active" id="tabCards"   onclick="setView('cards')">📇 Kort</button>
   <button class="tab-btn" id="tabListen"  onclick="setView('listen')">🎧 Lyt</button>
   <button class="tab-btn" id="tabSamtale" onclick="setView('samtale')">💬 Samtale</button>
+  <button class="tab-btn" id="tabSprint" onclick="setView('sprint')">🎯 Modul 4</button>
   <button class="gear-btn" onclick="openSettings()" title="Settings">⚙</button>
 </nav>
 
@@ -680,6 +707,38 @@ header h1 span { font-style:normal; font-weight:700; color:var(--accent); }
   </div>
   <div class="chat-hint">Enter = send · 💡 = stuck? get reply ideas at your level · <span style="cursor:pointer;text-decoration:underline" onclick="newChat()">ny samtale</span></div>
 </div><!-- /viewSamtale -->
+
+<!-- ═══ v2.1 MODUL 4 SPRINT VIEW ═══ -->
+<div class="view" id="viewSprint">
+  <div class="mode-bar">
+    <button class="mode-btn active" onclick="setSprintTab('konn',this)">Konnektorer</button>
+    <button class="mode-btn" onclick="setSprintTab('forv',this)">Forveksling</button>
+    <button class="mode-btn" onclick="setSprintTab('quiz',this)">Udfyld quiz</button>
+  </div>
+
+  <div class="sprint-pane" id="sprintKonn">
+    <div class="sprint-count">Tryk på et ord for eksempel + oversættelse</div>
+    <div id="konnList"></div>
+  </div>
+
+  <div class="sprint-pane" id="sprintForv" style="display:none">
+    <div class="sprint-count">Ord der forveksles på prøven — tryk for forklaring</div>
+    <div id="forvList"></div>
+  </div>
+
+  <div class="sprint-pane" id="sprintQuiz" style="display:none">
+    <div class="progress-section">
+      <div class="prog-top">
+        <span id="quizCounter">Spørgsmål 1 af 15</span>
+        <span id="quizScore">Rigtige: 0 / 0</span>
+      </div>
+    </div>
+    <div id="quizCard"></div>
+    <div class="controls">
+      <button class="ctrl-btn" onclick="restartQuiz()">↺ Start forfra</button>
+    </div>
+  </div>
+</div><!-- /viewSprint -->
 
 <!-- ═══ v2.0 SETTINGS MODAL ═══ -->
 <div class="modal-bg" id="settingsModal" onclick="if(event.target===this)closeSettings()">
@@ -1392,7 +1451,7 @@ function renderNotesPanel() {
 // ════════════════════════════════════════════
 function setView(v) {
   stopAudio();
-  ['cards','listen','samtale'].forEach(x => {
+  ['cards','listen','samtale','sprint'].forEach(x => {
     document.getElementById('view'+x[0].toUpperCase()+x.slice(1)).classList.toggle('active', x===v);
     document.getElementById('tab'+x[0].toUpperCase()+x.slice(1)).classList.toggle('active', x===v);
   });
@@ -1729,6 +1788,164 @@ function useSugg(btn) {
 document.getElementById('chatInput').addEventListener('keydown', e => {
   if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
 });
+
+// ════════════════════════════════════════════
+// v2.1 — MODUL 4 SPRINT (connectors, confusables, cloze quiz)
+// pulled from real Danskuddannelse 3 / Modul 4 exam papers (A-E, 2026)
+// ════════════════════════════════════════════
+const KONNEKTORER = [
+  {group:'Modsætning — contrast', words:[
+    {w:'selvom', en:'even though', da:'Selvom det regnede, gik han en tur.', enEx:'Even though it was raining, he went for a walk.'},
+    {w:'alligevel', en:'anyway / still', da:'Han var træt. Han tog alligevel afsted.', enEx:"He was tired. He went anyway."},
+    {w:'tværtimod', en:'on the contrary', da:'Han er ikke doven. Tværtimod arbejder han hårdt.', enEx:"He's not lazy. On the contrary, he works hard."},
+    {w:'til gengæld', en:'in return / on the other hand', da:'Huslejen er høj. Til gengæld er der udsigt.', enEx:'The rent is high. On the other hand, there is a view.'}
+  ]},
+  {group:'Tilføjelse — addition', words:[
+    {w:'desuden / derudover', en:'furthermore / in addition', da:'Hun er dygtig. Desuden er hun rar.', enEx:"She's skilled. Furthermore, she's nice."},
+    {w:'også', en:'also', da:'Han kan lide fodbold. Han spiller også golf.', enEx:'He likes football. He also plays golf.'}
+  ]},
+  {group:'Årsag / resultat — cause / result', words:[
+    {w:'derfor', en:'therefore', da:'Det regnede. Derfor blev de hjemme.', enEx:'It was raining. Therefore they stayed home.'},
+    {w:'for (fordi)', en:'because', da:'Han tog bilen, for toget var forsinket.', enEx:'He took the car, because the train was delayed.'}
+  ]},
+  {group:'Betingelse / tid — condition / time', words:[
+    {w:'hvis', en:'if', da:'Hvis det regner, tager vi paraply med.', enEx:"If it rains, we'll bring an umbrella."},
+    {w:'når', en:'when (recurring / future)', da:'Når han kommer hjem, laver han mad.', enEx:'When he gets home, he cooks.'},
+    {w:'mens', en:'while', da:'Hun læste, mens han lavede mad.', enEx:'She read while he cooked.'},
+    {w:'medmindre', en:'unless', da:'Vi mødes kl. 18, medmindre du hører andet.', enEx:"We'll meet at 6pm, unless you hear otherwise."}
+  ]},
+  {group:'Rækkefølge / eksempel — sequence / example', words:[
+    {w:'blandt andet', en:'among other things', da:'Han laver blandt andet mad og rengøring.', enEx:'He does, among other things, cooking and cleaning.'},
+    {w:'for eksempel', en:'for example', da:'Hun kan lide sport, for eksempel løb.', enEx:'She likes sports, for example running.'},
+    {w:'først og fremmest', en:'first and foremost', da:'Først og fremmest skal vi tale sammen.', enEx:'First and foremost we need to talk.'},
+    {w:'endelig', en:'finally / lastly', da:'Endelig har man et problem med parkering.', enEx:'Finally, there is a problem with parking.'}
+  ]}
+];
+
+const FORVEKSLING = [
+  {a:'oftest', aEn:'most often', b:'altid', bEn:'always', note:'oftest = happens most of the time, not every time. altid = every single time, no exceptions.'},
+  {a:'sjældent', aEn:'rarely', b:'aldrig', bEn:'never', note:'sjældent = it does happen, just not often. aldrig = it does not happen at all.'},
+  {a:'vigtig', aEn:'important', b:'ligegyldig', bEn:"doesn't matter / irrelevant", note:'vigtig = matters a lot. ligegyldig = does not matter at all.'},
+  {a:'risiko', aEn:'risk', b:'fordel', bEn:'advantage', note:'risiko = something bad could happen. fordel = something good/beneficial.'},
+  {a:'de færreste', aEn:'the fewest (people) / a small minority', b:'kun', bEn:'only', note:'de færreste = a small minority of people. kun = limited to, restricted to.'},
+  {a:'begrænse', aEn:'to limit / restrict', b:'øge', bEn:'to increase', note:'begrænse = make smaller/less. øge = make bigger/more.'},
+  {a:'undvære', aEn:'to do without', b:'beholde', bEn:'to keep', note:'undvære = manage without something. beholde = continue to have something.'}
+];
+
+const SPRINT_QUIZ = [
+  {da:'Petra bor på et kollegium, men det er ___ et helt normalt kollegium.', options:['ikke','også','så'], answer:'ikke', en:'Petra lives in a dorm, but it is not a completely normal dorm.'},
+  {da:'Boligselskabet ombyggede containerne, ___ de kan bruges til beboelse.', options:['så','men','om'], answer:'så', en:'The housing company converted the containers, so they can be used for housing.'},
+  {da:'Hun er nødt ___ at være kreativ for at få plads.', options:['til','på','om'], answer:'til', en:'She has to be creative to make room.'},
+  {da:'___ er huslejen rimelig, sammenlignet med andre studieboliger.', options:['Til gengæld','Derfor','Alligevel'], answer:'Til gengæld', en:'On the other hand, the rent is reasonable compared to other student housing.'},
+  {da:'Malthes morfar tog ham ofte ___ på fisketure ved en sø.', options:['med','til','om'], answer:'med', en:"Malthe's grandfather often took him along on fishing trips by a lake."},
+  {da:'Han lærte Malthe, ___ man sidder stille uden at skræmme fiskene.', options:['hvordan','hvorfor','hvornår'], answer:'hvordan', en:'He taught Malthe how you sit still without scaring the fish.'},
+  {da:'Om vinteren, ___ der ligger is på vandet, kan de ikke fiske.', options:['når','hvis','fordi'], answer:'når', en:'In winter, when there is ice on the water, they cannot fish.'},
+  {da:'Louisa fortryder ikke sit valg, ___ det pædagogiske er spændende.', options:['for','men','så'], answer:'for', en:'Louisa does not regret her choice, because the pedagogical side is exciting.'},
+  {da:'___ det også er et travlt job, er hun glad for det.', options:['Selvom','Fordi','Så'], answer:'Selvom', en:'Even though it is also a busy job, she is happy with it.'},
+  {da:'Hun har små børn, ___ skal have aftensmad og i seng.', options:['som','der','men'], answer:'som', en:'She has small children, who need dinner and bedtime.'},
+  {da:'Alt i alt er hun tilfreds ___ sin uddannelse.', options:['med','på','om'], answer:'med', en:'All in all she is satisfied with her education.'},
+  {da:'Emil bruger meget tid på sin mobil, ___ og fremmest til praktiske ting.', options:['Først','Kun','Mest'], answer:'Først', en:'Emil spends a lot of time on his phone, first and foremost for practical things.'},
+  {da:'___ overvejer han alligevel at slette nogle af sine profiler.', options:['Alligevel','Men','Så'], answer:'Men', en:'But he is still considering deleting some of his profiles.'},
+  {da:'Han bruger for ___ tid på at kigge på opslag og videoer.', options:['meget','mange','så'], answer:'meget', en:'He spends too much time looking at posts and videos.'},
+  {da:'Bliver man for meget på 5 sociale medier ___, bliver det for meget.', options:['samtidig','sjældent','alligevel'], answer:'samtidig', en:'If you follow 5 social media platforms at the same time, it becomes too much.'}
+];
+
+let quizOrderSprint = SPRINT_QUIZ.slice();
+let quizIndexSprint = 0;
+let quizScoreSprint = 0;
+let quizAnsweredSprint = 0;
+
+function setSprintTab(tab, btn) {
+  document.querySelectorAll('#viewSprint .mode-btn').forEach(b=>b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('sprintKonn').style.display = tab==='konn' ? 'block':'none';
+  document.getElementById('sprintForv').style.display = tab==='forv' ? 'block':'none';
+  document.getElementById('sprintQuiz').style.display = tab==='quiz' ? 'block':'none';
+  if (tab==='konn' && !document.getElementById('konnList').innerHTML) renderKonnektorer();
+  if (tab==='forv' && !document.getElementById('forvList').innerHTML) renderForveksling();
+  if (tab==='quiz' && !document.getElementById('quizCard').innerHTML) renderSprintQuiz();
+}
+
+function renderKonnektorer() {
+  const el = document.getElementById('konnList');
+  let html = '';
+  KONNEKTORER.forEach((g, gi) => {
+    html += `<div class="sprint-group-label">${esc(g.group)}</div>`;
+    g.words.forEach((item, i) => {
+      const id = `konn-${gi}-${i}`;
+      html += `<div class="sprint-item" onclick="toggleSprintDetail('${id}')">
+        <div class="sprint-head"><span class="sprint-word">${esc(item.w)}</span><span class="sprint-en">${esc(item.en)}</span></div>
+        <div class="sprint-detail" id="${id}"><div class="da">${esc(item.da)}</div><div class="en">${esc(item.enEx)}</div></div>
+      </div>`;
+    });
+  });
+  el.innerHTML = html;
+}
+
+function renderForveksling() {
+  const el = document.getElementById('forvList');
+  let html = '';
+  FORVEKSLING.forEach((item, i) => {
+    const id = `forv-${i}`;
+    html += `<div class="sprint-item" onclick="toggleSprintDetail('${id}')">
+      <div class="sprint-head">
+        <span class="sprint-word">${esc(item.a)}</span><span class="sprint-en">${esc(item.aEn)}</span>
+        <span class="sprint-vs">vs.</span>
+        <span class="sprint-word">${esc(item.b)}</span><span class="sprint-en">${esc(item.bEn)}</span>
+      </div>
+      <div class="sprint-detail" id="${id}"><div class="en">${esc(item.note)}</div></div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function toggleSprintDetail(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+function renderSprintQuiz() {
+  const el = document.getElementById('quizCard');
+  document.getElementById('quizCounter').textContent = `Spørgsmål ${Math.min(quizIndexSprint+1, quizOrderSprint.length)} af ${quizOrderSprint.length}`;
+  document.getElementById('quizScore').textContent = `Rigtige: ${quizScoreSprint} / ${quizAnsweredSprint}`;
+  if (quizIndexSprint >= quizOrderSprint.length) {
+    el.innerHTML = `<div class="quiz-done"><div class="num">${quizScoreSprint} / ${quizOrderSprint.length}</div><p style="color:var(--muted);font-family:'DM Mono',monospace;font-size:0.75rem;margin-top:6px">rigtige svar</p></div>`;
+    return;
+  }
+  const item = quizOrderSprint[quizIndexSprint];
+  let html = `<div class="quiz-sentence">${esc(item.da)}</div><div id="quizOptions">`;
+  item.options.forEach(opt => {
+    html += `<button class="quiz-opt" onclick="checkSprintAnswer(this,'${esc(opt).replace(/'/g,"\\'")}')">${esc(opt)}</button>`;
+  });
+  html += `</div><div class="quiz-en-toggle" onclick="toggleQuizEn()">vis oversættelse / show translation</div><div class="quiz-en-line" id="quizEnLine">${esc(item.en)}</div>`;
+  el.innerHTML = html;
+}
+
+function toggleQuizEn() {
+  document.getElementById('quizEnLine').classList.toggle('open');
+}
+
+function checkSprintAnswer(btn, chosen) {
+  const item = quizOrderSprint[quizIndexSprint];
+  const buttons = document.querySelectorAll('#quizOptions .quiz-opt');
+  buttons.forEach(b => b.disabled = true);
+  const correct = chosen === item.answer;
+  if (correct) {
+    btn.classList.add('correct');
+    quizScoreSprint++;
+  } else {
+    btn.classList.add('wrong');
+    buttons.forEach(b => { if (b.textContent === item.answer) b.classList.add('correct'); });
+  }
+  quizAnsweredSprint++;
+  document.getElementById('quizScore').textContent = `Rigtige: ${quizScoreSprint} / ${quizAnsweredSprint}`;
+  setTimeout(() => { quizIndexSprint++; renderSprintQuiz(); }, 1100);
+}
+
+function restartQuiz() {
+  quizOrderSprint = shuffle(SPRINT_QUIZ.slice());
+  quizIndexSprint = 0; quizScoreSprint = 0; quizAnsweredSprint = 0;
+  renderSprintQuiz();
+}
 
 // ════════════════════════════════════════════
 // START
